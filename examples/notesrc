@@ -1,0 +1,16 @@
+# ~/.notesrc example
+
+# where the files are located (root directory)
+notebook=~/Nextcloud/Notes
+
+# exclude list
+exclude .git trash *.sqlite
+
+# rules
+rule view *.pdf nupdf
+rule edit *.txt $EDITOR
+rule edit *.md  nvim
+
+# user defined menu items
+umenu xdg-open; xdg-open
+

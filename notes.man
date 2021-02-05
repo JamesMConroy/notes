@@ -1,0 +1,102 @@
+.\" x-roff document
+.do mso man.tmac
+.TH notes 1 2021-01-22 "NDC Tools Collection"
+.SH NAME
+notes - manages note files.
+.PP
+.SH SYNOPSIS
+notes [\fIOPTIONS\fP]...[-s \fIsection\fP]{\fInote\fP |\fIpattern\fP}[\fIfiles\fP]...
+.PP
+.SH DESCRIPTION
+notes uses a directory to store users files for notes. The directory can be a \fBNextcloud®\fP Notes. The files can be plain text, markdown or anything else that can configured by \fIrule\fP command in configuration file (see notesrc(5)). If the \fInote\fP is `\f[CR]-\fP' then it reads from \fIstdin\fP.
+.PP
+Running program without arguments, enters in TUI mode (ncurses interface).
+.PP
+The program was designed to behave as `\f[CR]man\fP' command.
+.PP
+.RS 4
+.EX
+
+> # show note 'sig11'; if not found it will display all similar titles
+> notes sig11
+
+> # show all pages that match 'sig11'
+> notes sig11 -a
+
+> # show page of section 'unix' that match 'sig11'
+> notes -s unix sig11
+
+.EE
+.RE
+.PP
+.SH OPTIONS
+.TP
+\fB-a, --add
+\fRCreates a new note file. If file extension is not specified then it will use the default (see notesrc). If additional file(s) are specified will be inserted on the finale note. If note exists then it will be truncated. Use it with `\f[CR]-e\fP' to invoke the editor or with `\f[CR]-\fP' to get input from \fIstdin\fP.
+.PP
+.TP
+\fB-A, --append
+\fRSame as `\f[CR]-a\fP' but appends to an existing (or not) note. If note does not exists then it will create.
+.PP
+.TP
+\fB-v, --view
+\fRShows the \fInote\fP with the default \fI$PAGER\fP or the one specified by `\f[CR]rule\fP'(see notesrc).
+.PP
+.TP
+\fB-p, --print
+\fRSame as `\f[CR]-v\fP' but writes the contents to \fIstdout\fP.
+.PP
+.TP
+\fB-e, --edit
+\fRLoads the \fInote\fP to the default \fI$EDITOR\fP or the one specified by `\f[CR]rule\fP'(see notesrc).
+.PP
+.TP
+\fB-l, --list
+\fRDisplays the notes names that match to the \fIpattern\fP.
+.PP
+.TP
+\fB-f, --files
+\fRSame as `\f[CR]-l\fP' but prints out the full-path filenames instead of their titles.
+.PP
+.TP
+\fB-d, --delete
+\fRDeletes a note.
+.PP
+.TP
+\fB-r, --rename
+\fRRenames (and/or moves) note. A second parameter is required to specify the new name. If file extension is specified in the new name, then it will use it.
+.PP
+.TP
+\fB-h, --help
+\fRDisplays a short-help text and exits.
+.PP
+.TP
+\fB--version
+\fRDisplays the program version, copyright and license information and exists.
+.PP
+.SH TODO
+.IP \(bu 4
+list for completion
+.IP \(bu 4
+notes --add-section xxx
+.IP \(bu 4
+notes --delete-section xxx
+.IP \(bu 4
+notes --rename-section xxx xxx
+.PP
+.SH COPYRIGHT
+Copyright © 2020-2021 Nicholas Christopoulos.
+.PP
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>. This is free software: you are free to change and redistribute it. There is NO WARRANTY, to the extent permitted by law.
+.PP
+.SH AUTHOR
+Written by Nicholas Christopoulos <mailto:nereus@freemail.gr>.
+.PP
+.SH SEE ALSO
+\fBnotesrc\fP(5)
+,
+\fBgroff_man\fP(7)
+,
+\fBman-pages\fP(7)
+.
+.PP

@@ -1,0 +1,86 @@
+.\" x-roff document
+.do mso man.tmac
+.TH notesrc 5 2021-01-22 NDC
+.SH NAME
+notesrc - NDC's notes configuration file.
+.PP
+.SH DESCRIPTION
+\fInotes\fP uses a directory to store users files for notes. The directory can be a \fBNextcloud®\fP Notes. The files can be plain text, markdown or anything else that can configured by \fIrule\fP statements in configuration file.
+.PP
+During startup \fInotes\fP reads the configuration file \fI$XDG_CONFIG_HOME/notes/noterc\fP or \fI~/.config/notes/noterc\fP or \fI~/.notesrc\fP; whichever is encountered first.
+.PP
+.SH VARIABLES
+.TP
+\fBnotebook = <directory>
+\fRThe directory where the files are located. If the directory is not specified then, if \fI~/Nextcloud/Notes\fP found, it will be used, otherwise the \fI~/.notes\fP will be used.
+.PP
+.TP
+\fBbackupdir = <directory>
+\fRThe \fInotes\fP stores backup files of the notes before edited or deleted. If \fIbackupdir\fP is omitted then environment variable \fI$BACKUPDIR\fP will be used if it is exists; otherwise no backup will be used.
+.PP
+.TP
+\fBdeftype = <extension>
+\fRThis is the default file type that used when user did not specify one in the note - name. Actually this is used only when you add new notes.
+.PP
+.RS 4
+.EX
+
+deftype=txt
+
+.EE
+.RE
+.PP
+.SH STATEMENTS
+.TP
+\fBrule *action* *pattern* *command*
+\fR\fIRules\fP defines how the program will react of each file type. The are two \fIactions\fP for now, the \fIview\fP and the \fIedit\fP.
+.PP
+.RS 4
+.EX
+
+rule view *.[0-9] man
+rule view *.man   man
+rule view *.md    bat
+rule view *.txt   less
+rule view *.pdf   zathura
+rule edit *       $EDITOR
+
+.EE
+.RE
+.PP
+.TP
+\fBexclude *pattern* [*pattern* ...]
+\fRFile match patterns of files / directories to ignore.
+.PP
+.RS 4
+.EX
+
+exclude .git trash *.sqlite
+
+.EE
+.RE
+.PP
+.TP
+\fBumenu *label* ; *command*
+\fRSpecifies user-defined menu item to deal with current or tagged files. The command will get the list of files as parameter. Use the 'm' key to invoke the user-defined menu.
+.PP
+.RS 4
+.EX
+
+umenu print the files ; echo
+umenu print the contents ; cat
+
+.EE
+.RE
+.PP
+.SH COPYRIGHT
+Copyright © 2020-2021 Nicholas Christopoulos.
+.PP
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>. This is free software: you are free to change and redistribute it. There is NO WARRANTY, to the extent permitted by law.
+.PP
+.SH AUTHOR
+Written by Nicholas Christopoulos <mailto:nereus@freemail.gr>.
+.PP
+.SH SEE ALSO
+\fBnotes\fP(1)
+.PP
