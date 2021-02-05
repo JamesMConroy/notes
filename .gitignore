@@ -1,4 +1,5 @@
 notes
+*.gz
 
 # Prerequisites
 *.d
