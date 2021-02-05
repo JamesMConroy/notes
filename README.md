@@ -1,6 +1,11 @@
 # notes
 Notes manager.
 
+Concept: I want to keep my notes in plain text files, to search them like `man`
+and to share them with my laptop and phone. I want to add outputs of programs plus
+to append/create from cli with `echo`. I like to use `groff` format but I never
+did it. I want to reorganize them with a file manager like `mc`.
+
 * Notes are plain text files (txt,md,troff,...). It can support any type, but it is designed for plain-text.
 * CLI interface. It is designed to behave as `man`.
 * NCurses interface (run it without arguments).
