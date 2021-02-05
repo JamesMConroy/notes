@@ -10,5 +10,7 @@ behave as `man` utility too.
 
 You will need my [md2roff](https://github.com/nereusx/md2roff) utility to create the man pages.
 
-![Screenshot](https://raw.githubusercontent.com/nereusx/notes/main/screenshots/notes-112x30.png)
+![NCurses interface](https://raw.githubusercontent.com/nereusx/notes/main/screenshots/notes-112x30.png)
+
+![CLI](https://raw.githubusercontent.com/nereusx/notes/main/screenshots/notes-cli.png)
 
