@@ -1,14 +1,13 @@
 # notes
 Notes manager.
 
-* Notes are plain text files (txt,md,troff,...).
-* CLI interface.
+* Notes are plain text files (txt,md,troff,...). It can support any type, but it is designed for plain-text.
+* CLI interface. It is designed to behave as `man`.
 * NCurses interface (run it without arguments).
+* Nextcloud Notes compatible. I use nextcloud to synchronize my notes and use them in Android. So it builded to work well with Nextcloud.
+* User-defined popup menu (see `man notesrc`).
 
-The application created to works well with Nextcloud Notes, and designed to
-behave as `man` utility too.
-
-You will need my [md2roff](https://github.com/nereusx/md2roff) utility to create the man pages.
+You will need my [md2roff](https://github.com/nereusx/md2roff) utility to create the man pages; this in not necessary if you use the `*.man` files that are stored in this repo.
 
 ## Installation
 
@@ -26,4 +25,3 @@ make install
 ![NCurses interface](https://raw.githubusercontent.com/nereusx/notes/main/screenshots/notes-112x30.png)
 
 ![CLI](https://raw.githubusercontent.com/nereusx/notes/main/screenshots/notes-cli.png)
-
