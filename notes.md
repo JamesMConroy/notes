@@ -68,13 +68,6 @@ Displays a short-help text and exits.
 #### --version
 Displays the program version, copyright and license information and exists.
 
-## TODO
-
-* list for completion
-* notes --add-section xxx
-* notes --delete-section xxx
-* notes --rename-section xxx xxx
-
 ## COPYRIGHT
 Copyright © 2020-2021 Nicholas Christopoulos.
 
