@@ -61,6 +61,7 @@ Deletes a note.
 #### -r, --rename
 Renames (and/or moves) note. A second parameter is required to specify the new
 name. If file extension is specified in the new name, then it will use it.
+Rename can also change the section if separated by '/' before the name.
 
 #### -h, --help
 Displays a short-help text and exits.
