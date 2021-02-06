@@ -44,7 +44,19 @@ void nc_view(const char *title, const char *body) {
 
 	offset = 0;
 	do {
-		touchwin(wout);
+		// EOT
+		bool eot = (lines - offset <= getmaxy(w));
+		if ( eot ) {
+			offset = lines - getmaxy(w);
+			if ( offset < 0 ) offset = 0;
+			// ␄
+			nc_mvwprintf(wout, getmaxy(wout) - 2, getmaxx(wout) - 3, "\ec20+ \ec20-");
+			}
+		else
+			nc_mvwprintf(wout, getmaxy(wout) - 2, getmaxx(wout) - 3, "\ec20+↓\ec20-");
+		wrefresh(wout);
+
+		//
 		werase(w);
 		for ( i = offset, y = 0; i < lines; i ++, y ++ )
 			mvwprintw(w, y, 0, "%s", text[i]);
@@ -75,7 +87,7 @@ void nc_view(const char *title, const char *body) {
 			break;
 		case 'g': case KEY_HOME:	offset = 0; break;
 		case 'G': case KEY_END:		offset = lines - 1; break;
-			}
+			};
 		} while ( !exf );
 
 	// cleanup
