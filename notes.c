@@ -464,15 +464,17 @@ note_t*	make_note(const char *name, const char *defsec, int flags) {
 		strcpy(note->name, p+1);
 		strncpy(note->section, name, p - name);
 		note->section[p - name] = '\0';
+		normalize_section_name(note->section);
 		make_section(note->section);
 		snprintf(note->file, PATH_MAX, "%s/%s/%s", ndir, note->section, note->name);
 		}
 	else {
 		strcpy(note->name, name);
 		if ( defsec && strlen(defsec) ) {
-			make_section(defsec);
 			strcpy(note->section, defsec);
-			snprintf(note->file, PATH_MAX, "%s/%s/%s", ndir, defsec, name);
+			normalize_section_name(note->section);
+			make_section(note->section);
+			snprintf(note->file, PATH_MAX, "%s/%s/%s", ndir, note->section, name);
 			}
 		else {
 			snprintf(note->file, PATH_MAX, "%s/%s", ndir, name);
