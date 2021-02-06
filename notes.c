@@ -474,11 +474,11 @@ note_t*	make_note(const char *name, const char *defsec, int flags) {
 			strcpy(note->section, defsec);
 			normalize_section_name(note->section);
 			make_section(note->section);
-			snprintf(note->file, PATH_MAX, "%s/%s/%s", ndir, note->section, name);
+			snprintf(note->file, PATH_MAX, "%s/%s/%s", ndir, note->section, note->name);
 			}
 		else {
-			snprintf(note->file, PATH_MAX, "%s/%s", ndir, name);
 			strcpy(note->section, "");
+			snprintf(note->file, PATH_MAX, "%s/%s", ndir, note->name);
 			}
 		}
 	
@@ -896,19 +896,13 @@ void explorer() {
 					for ( list_node_t *cur = tagged->head; cur; cur = (list_node_t *) cur->next ) {
 						note_t *cn = (note_t *) cur->data;
 						note_backup(cn);
-						note_t *nn = make_note(cn->name, new_section, 1);
-						if ( !copy_file(cn->file, nn->file) ) {
-							sprintf(status, "copy failed");
+						note_t *nn = make_note(cn->name, new_section, 0);
+						if ( rename(cn->file, nn->file) != 0 ) {
+							sprintf(status, "move failed");
 							fail ++;
 							}
-						else {
-							if ( remove(cn->file) != 0 ) {
-								sprintf(status, "delete old note failed");
-								fail ++;
-								}
-							else
-								succ ++;
-							}
+						else
+							succ ++;
 						free(nn);
 						}
 
@@ -923,11 +917,13 @@ void explorer() {
 					}
 				
 				ex_rebuild();
+				ex_refresh();
 				}
 			break;
 		case KEY_F(5):
 			ex_rebuild();
 			sprintf(status, "rebuilded.");
+			ex_refresh();
 			break;
 		case KEY_F(4): // show in filemanager
 			{
