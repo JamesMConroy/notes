@@ -10,6 +10,7 @@ did it. I want to reorganize them with a file manager like `mc`.
 * CLI interface. It is designed to behave as `man`.
 * NCurses interface (run it without arguments).
 * Nextcloud Notes compatible. I use nextcloud to synchronize my notes and use them in Android. So it designed to work well with Nextcloud.
+* Viewer & Editor can specified per file type.
 * User-defined popup menu (see `man notesrc`).
 
 The notes-files must be stored in one user-defined place and can have subdirectories.
