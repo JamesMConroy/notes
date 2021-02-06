@@ -885,6 +885,7 @@ void explorer() {
 				if ( ex_input(buf, "Enter the new section") && strlen(buf) && (strchr(buf, '/') == NULL) ) {
 					char *new_section = strdup(buf);
 					normalize_section_name(new_section);
+					make_section(new_section);
 						
 					// add the current element to tagged list
 					if ( !list_count(tagged) )
