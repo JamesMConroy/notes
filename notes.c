@@ -425,6 +425,20 @@ void vexpand(char *buf) {
 		}
 	}
 
+//
+void normalize_section_name(char *section) {
+	list_node_t *cur;
+	note_t		*note;
+
+	for ( cur = notes->head; cur; cur = (list_node_t *) cur->next ) {
+		note = (note_t *) cur->data;
+		if ( strcasecmp(note->section, section) == 0 ) {
+			strcpy(section, note->section);
+			break;
+			}
+		}
+	}
+
 // if section does not exists, creates it
 void make_section(const char *sec) {
 	char dest[PATH_MAX];
@@ -866,17 +880,10 @@ void explorer() {
 		case 'c': // change section
 			if ( t_notes_count ) {
 				strcpy(buf, "");
-				if ( ex_input(buf, "Enter the new section") && strlen(buf) ) {
+				if ( ex_input(buf, "Enter the new section") && strlen(buf) && (strchr(buf, '/') == NULL) ) {
 					char *new_section = strdup(buf);
-					
-					// get the correct case
-					for ( int i = 0; i < t_notes_count; i ++ ) {
-						if ( strcasecmp(t_notes[i]->section, new_section) == 0 ) {
-							strcpy(new_section, t_notes[i]->section);
-							break;
-							}
-						}
-					
+					normalize_section_name(new_section);
+						
 					// add the current element to tagged list
 					if ( !list_count(tagged) )
 						list_addptr(tagged, t_notes[pos]);
