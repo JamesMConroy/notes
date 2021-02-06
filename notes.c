@@ -1141,7 +1141,8 @@ Modes:\n\
 \n\
 Options:\n\
     -s, --section  define section\n\
-    --complete     list notes for scripts (completion code)\n\
+    TODO: --cleanup      removes empty sections\n\
+    TODO: --complete     list notes for scripts (completion code)\n\
     -a, --all      displays all files that found, use it with -p, -v or -e\n\
     -              input from stdin\n\
 \n\
