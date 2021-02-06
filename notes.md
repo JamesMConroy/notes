@@ -16,7 +16,8 @@ Running program without arguments, enters in TUI mode (ncurses interface).
 The program was designed to behave as `man` command.
 
 ```
-> # show note 'sig11'; if not found it will display all similar titles
+> # show note 'sig11'; if not found it will display all titles containing
+> # the string
 > notes sig11
 
 > # show all pages that match 'sig11'
