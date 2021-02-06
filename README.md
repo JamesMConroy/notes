@@ -40,3 +40,5 @@ make install
 ![NCurses interface](https://raw.githubusercontent.com/nereusx/notes/main/screenshots/notes-112x30.png)
 
 ![CLI](https://raw.githubusercontent.com/nereusx/notes/main/screenshots/notes-cli.png)
+
+[The fonts](https://github.com/nereusx/xsg-fonts)
