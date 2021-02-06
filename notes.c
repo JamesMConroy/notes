@@ -441,19 +441,29 @@ void make_section(const char *sec) {
 	}
 
 // create a note node
-note_t*	make_note(const char *name, const char *section, int flags) {
+note_t*	make_note(const char *name, const char *defsec, int flags) {
 	note_t *note = (note_t *) malloc(sizeof(note_t));
 	FILE *fp;
+	const char *p;
 
-	strcpy(note->name, name);
-	if ( section && strlen(section) ) {
-		make_section(section);
-		strcpy(note->section, section);
-		snprintf(note->file, PATH_MAX, "%s/%s/%s", ndir, section, name);
+	if ( (p = strrchr(name, '/')) != NULL ) {
+		strcpy(note->name, p+1);
+		strncpy(note->section, name, p - name);
+		note->section[p - name] = '\0';
+		make_section(note->section);
+		snprintf(note->file, PATH_MAX, "%s/%s/%s", ndir, note->section, note->name);
 		}
 	else {
-		snprintf(note->file, PATH_MAX, "%s/%s", ndir, name);
-		strcpy(note->section, "");
+		strcpy(note->name, name);
+		if ( defsec && strlen(defsec) ) {
+			make_section(defsec);
+			strcpy(note->section, defsec);
+			snprintf(note->file, PATH_MAX, "%s/%s/%s", ndir, defsec, name);
+			}
+		else {
+			snprintf(note->file, PATH_MAX, "%s/%s", ndir, name);
+			strcpy(note->section, "");
+			}
 		}
 	
 	if ( strrchr(name, '.') == NULL ) { // if no file extension specified
