@@ -33,11 +33,23 @@ The program was designed to behave as `man` command.
 #### -a[!], --add[!]
 Creates a new note file. If file extension is not specified then it will use the
 default (see notesrc).
-If additional file(s) are specified in the command line
-will be inserted on the final note.
-Use it with `-e` to invoke the editor or  `-` to get input from *stdin*.
-If the name is already used in this section, then an error will
-occurred; use `!` suffix to truncate the existing file.
+If additional files are specified in the command line, their contents will be inserted into the new note.
+Use it with `-e` to invoke the editor or `-` to get input from *stdin*.
+If the name is already used in this section, then an error will be issued;
+use `!` suffix to truncate the existing file.
+
+```
+# Example 1: cat yyy zzz >> xxx
+% notes -a xxx yyy zzz
+# same as
+% cat yyy zzz | notes -a xxx -
+
+# example 2
+% echo "hello world" | notes -a xxx -
+
+# example 3
+% cat ~/.notesrc | notes -a! notesrc -
+```
 
 #### -A, --append
 Same as `-a` but instead of overwriting, the new note is appended to the file.
