@@ -32,12 +32,12 @@ The program was designed to behave as `\f[CR]man\fP' command.
 .PP
 .SH OPTIONS
 .TP
-\fB-a, --add
-\fRCreates a new note file. If file extension is not specified then it will use the default (see notesrc). If additional file(s) are specified will be inserted on the finale note. If note exists then it will be truncated. Use it with `\f[CR]-e\fP' to invoke the editor or with `\f[CR]-\fP' to get input from \fIstdin\fP.
+\fB-a[!], --add[!]
+\fRCreates a new note file. If file extension is not specified then it will use the default (see notesrc). If additional file(s) are specified in the command line will be inserted on the final note. Use it with `\f[CR]-e\fP' to invoke the editor or with `\f[CR]-\fP' to get input from \fIstdin\fP. If note exists then an error will created; use `\f[CR]!\fP' to avoid this and truncate the existing file.
 .PP
 .TP
 \fB-A, --append
-\fRSame as `\f[CR]-a\fP' but appends to an existing (or not) note. If note does not exists then it will create.
+\fRSame as `\f[CR]-a\fP' but appends to an existing (or not) note. If note does not exists then it will be created.
 .PP
 .TP
 \fB-v, --view
@@ -74,6 +74,14 @@ The program was designed to behave as `\f[CR]man\fP' command.
 .TP
 \fB--version
 \fRDisplays the program version, copyright and license information and exists.
+.PP
+.TP
+\fB--onstart
+\fRExecutes the command defined by `\f[CR]onstart\fP' in the configuration file. This option is useful when custom synchronization needed.
+.PP
+.TP
+\fB--onexit
+\fRExecutes the command defined by `\f[CR]onexit\fP' in the configuration file. This option is useful when custom synchronization needed.
 .PP
 .SH COPYRIGHT
 Copyright © 2020-2021 Nicholas Christopoulos.

@@ -58,6 +58,7 @@
 #define OPT_COMPL	0x0400
 #define OPT_STDIN	0x0800
 #define OPT_PRINT	0x1000
+#define OPT_NOCLOB	0x2000
 
 int		opt_flags = OPT_AUTO;
 
@@ -493,6 +494,12 @@ note_t*	make_note(const char *name, const char *defsec, int flags) {
 	
 	// create the file
 	if ( flags & 0x01 ) { // create file
+		if ( (opt_flags & OPT_ADD) && !(opt_flags & OPT_NOCLOB) ) {
+			if ( access(note->file, F_OK) == 0 ) {
+				fprintf(stderr, "File '%s' already exists.\n", note->file);
+				return NULL;
+				}
+			}
 		if ( (fp = fopen(note->file, "wt")) != NULL )
 			fclose(fp);
 		else {
@@ -1147,10 +1154,14 @@ Modes:\n\
 \n\
 Options:\n\
     -s, --section  define section\n\
-    TODO: --cleanup      removes empty sections\n\
-    TODO: --complete     list notes for scripts (completion code)\n\
     -a, --all      displays all files that found, use it with -p, -v or -e\n\
     -              input from stdin\n\
+\n\
+Utilities:\n\
+    WIP --cleanup      removes empty sections\n\
+    WIP --complete     list notes for scripts (completion code)\n\
+    --onstart      executes the 'onstart' command and returns its exit code.\n\
+    --onexit       executes the 'onexit' command and returns its exit code.\n\
 \n\
     -h, --help     this screen\n\
     --version      version and program information\n\
@@ -1196,6 +1207,7 @@ int main(int argc, char *argv[]) {
 				case 'p': opt_flags = OPT_VIEW|OPT_PRINT; break;
 				case 'f': opt_flags |= OPT_FILES; break;
 				case 'a': opt_flags = (opt_flags & OPT_AUTO) ? OPT_ADD : opt_flags | OPT_ALL; break;
+				case '!': opt_flags |= OPT_NOCLOB; break;
 				case 's': asw = current_section; sectionf = true; break;
 				case 'r': opt_flags = OPT_MOVE; break;
 				case 'd': opt_flags = OPT_DEL; break;

@@ -29,15 +29,17 @@ The program was designed to behave as `man` command.
 
 ## OPTIONS
 
-#### -a, --add
+#### -a[!], --add[!]
 Creates a new note file. If file extension is not specified then it will use the
-default (see notesrc). If additional file(s) are specified will be inserted on
-the finale note. If note exists then it will be truncated.
+default (see notesrc). If additional file(s) are specified in the command line
+will be inserted on the final note.
 Use it with `-e` to invoke the editor or with `-` to get input from *stdin*.
+If note exists then an error will created; use `!` to avoid this and truncate
+the existing file.
 
 #### -A, --append
 Same as `-a` but appends to an existing (or not) note. If note does not exists
-then it will create.
+then it will be created.
 
 #### -v, --view
 Shows the *note* with the default *$PAGER* or the one specified by `rule` (see
@@ -69,6 +71,14 @@ Displays a short-help text and exits.
 
 #### --version
 Displays the program version, copyright and license information and exists.
+
+#### --onstart
+Executes the command defined by `onstart` in the configuration file.
+This option is useful when custom synchronization needed.
+
+#### --onexit
+Executes the command defined by `onexit` in the configuration file.
+This option is useful when custom synchronization needed.
 
 ## COPYRIGHT
 Copyright © 2020-2021 Nicholas Christopoulos.
