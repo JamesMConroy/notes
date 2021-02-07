@@ -1121,6 +1121,9 @@ void init() {
 	// setting up default pager and editor
 	rule_add("view * ${PAGER:-less}");
 	rule_add("edit * ${EDITOR:-vi}");
+
+	// environment variables for subshells
+	setenv("NOTESDIR", ndir, 1);
 	}
 
 //
