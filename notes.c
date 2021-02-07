@@ -1217,6 +1217,7 @@ int main(int argc, char *argv[]) {
 				case '-': // -- double minus
 					if ( strcmp(argv[i], "--all") == 0 )			{ opt_flags |= OPT_ALL; }
 					else if ( strcmp(argv[i], "--add") == 0 )		{ opt_flags = OPT_ADD; }
+					else if ( strcmp(argv[i], "--add!") == 0 )		{ opt_flags = OPT_ADD | OPT_NOCLOB; }
 					else if ( strcmp(argv[i], "--append") == 0 )	{ opt_flags = OPT_APPD; }
 					else if ( strcmp(argv[i], "--list") == 0 )		{ opt_flags = OPT_LIST; }
 					else if ( strcmp(argv[i], "--view") == 0 )		{ opt_flags = OPT_VIEW; }
