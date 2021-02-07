@@ -33,7 +33,24 @@ The program was designed to behave as `\f[CR]man\fP' command.
 .SH OPTIONS
 .TP
 \fB-a[!], --add[!]
-\fRCreates a new note file. If file extension is not specified then it will use the default (see notesrc). If additional file(s) are specified in the command line will be inserted on the final note. Use it with `\f[CR]-e\fP' to invoke the editor or `\f[CR]-\fP' to get input from \fIstdin\fP. If the name is already used in this section, then an error will occurred; use `\f[CR]!\fP' suffix to truncate the existing file.
+\fRCreates a new note file. If file extension is not specified then it will use the default (see notesrc). If additional files are specified in the command line, their contents will be inserted into the new note. Use it with `\f[CR]-e\fP' to invoke the editor or `\f[CR]-\fP' to get input from \fIstdin\fP. If the name is already used in this section, then an error will be issued; use `\f[CR]!\fP' suffix to truncate the existing file.
+.PP
+.RS 4
+.EX
+
+# Example 1: cat yyy zzz >> xxx
+% notes -a xxx yyy zzz
+# same as
+% cat yyy zzz | notes -a xxx -
+
+# example 2
+% echo "hello world" | notes -a xxx -
+
+# example 3
+% cat ~/.notesrc | notes -a! notesrc -
+
+.EE
+.RE
 .PP
 .TP
 \fB-A, --append

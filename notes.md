@@ -40,15 +40,13 @@ use `!` suffix to truncate the existing file.
 
 ```
 # Example 1: cat yyy zzz >> xxx
-% notes -a xxx yyy zzz
-# same as
-% cat yyy zzz | notes -a xxx -
+> notes -a xxx yyy zzz
 
-# example 2
-% echo "hello world" | notes -a xxx -
+# example 2:
+> echo "hello world" | notes -a xxx -
 
-# example 3
-% cat ~/.notesrc | notes -a! notesrc -
+# example 3:
+> cat ~/.notesrc | notes -a! notesrc -
 ```
 
 #### -A, --append
