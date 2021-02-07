@@ -3,7 +3,7 @@
 notes - manages note files.
 
 ## SYNOPSIS
-notes [*OPTIONS*]... [-s *section*] {*note* | *pattern*} [*files*]...
+notes [*OPTIONS*] [-s *section*] {*note* | *pattern*} [-|*file* ...]
 
 ## DESCRIPTION
 notes uses a directory to store users files for notes. The directory can be
@@ -65,6 +65,9 @@ Deletes a note.
 Renames (and/or moves) note. A second parameter is required to specify the new
 name. If file extension is specified in the new name, then it will use it.
 Rename can also change the section if separated by '/' before the name.
+
+#### --all
+Displays all notes that found (-p, -e, -v).
 
 #### -h, --help
 Displays a short-help text and exits.

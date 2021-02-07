@@ -5,7 +5,7 @@
 notes - manages note files.
 .PP
 .SH SYNOPSIS
-notes [\fIOPTIONS\fP]...[-s \fIsection\fP]{\fInote\fP |\fIpattern\fP}[\fIfiles\fP]...
+notes [\fIOPTIONS\fP][-s \fIsection\fP]{\fInote\fP |\fIpattern\fP}[-|*file*...]
 .PP
 .SH DESCRIPTION
 notes uses a directory to store users files for notes. The directory can be a \fBNextcloud®\fP Notes. The files can be plain text, markdown or anything else that can configured by \fIrule\fP command in configuration file (see notesrc(5)). If the \fInote\fP is `\f[CR]-\fP' then it reads from \fIstdin\fP.
@@ -66,6 +66,10 @@ The program was designed to behave as `\f[CR]man\fP' command.
 .TP
 \fB-r, --rename
 \fRRenames (and/or moves) note. A second parameter is required to specify the new name. If file extension is specified in the new name, then it will use it. Rename can also change the section if separated by '/' before the name.
+.PP
+.TP
+\fB--all
+\fRDisplays all notes that found (-p,-e,-v).
 .PP
 .TP
 \fB-h, --help
