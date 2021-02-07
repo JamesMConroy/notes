@@ -1145,7 +1145,7 @@ static const char *usage = "\
 Usage: notes [mode] [options] [-s section] {note|pattern} [-|file(s)]\n\
 \n\
 Modes:\n\
-    -a, --add      add a new note\n\
+    -a, --add      add a new note. use `!' suffix to overwrite the note of exists. \n\
     -A, --append   append to note\n\
     -l, --list     list notes ('*' displays all)\n\
     -f, --files    same as list but displays only full pathnames (for scripts)\n\

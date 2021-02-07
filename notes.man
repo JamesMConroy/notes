@@ -8,7 +8,7 @@ notes - manages note files.
 notes [\fIOPTIONS\fP][-s \fIsection\fP]{\fInote\fP |\fIpattern\fP}[-|*file*...]
 .PP
 .SH DESCRIPTION
-notes uses a directory to store users files for notes. The directory can be a \fBNextcloud®\fP Notes. The files can be plain text, markdown or anything else that can configured by \fIrule\fP command in configuration file (see notesrc(5)). If the \fInote\fP is `\f[CR]-\fP' then it reads from \fIstdin\fP.
+Your notes (files) are stored in a directory (and its subdirectories). This directory can be the \fBNextcloud®\fP's (`\f[CR]~/Nextcloud/Notes\fP'). The files can be plain text, markdown or anything else that can configured by the \fIrule\fP command in the configuration file (see notesrc(5)). If the \fInote\fP is `\f[CR]-\fP' then it reads from \fIstdin\fP.
 .PP
 Running program without arguments, enters in TUI mode (ncurses interface).
 .PP
@@ -24,7 +24,8 @@ The program was designed to behave as `\f[CR]man\fP' command.
 > # show all pages that match 'sig11'
 > notes sig11 -a
 
-> # show page of section 'unix' that match 'sig11'
+> # show page of section (i.e. subdirectory in disk / category in nextcloud)
+> # 'unix' that match 'sig11'
 > notes -s unix sig11
 
 .EE
@@ -33,7 +34,7 @@ The program was designed to behave as `\f[CR]man\fP' command.
 .SH OPTIONS
 .TP
 \fB-a[!], --add[!]
-\fRCreates a new note file. If file extension is not specified then it will use the default (see notesrc). If additional file(s) are specified in the command line will be inserted on the final note. Use it with `\f[CR]-e\fP' to invoke the editor or with `\f[CR]-\fP' to get input from \fIstdin\fP. If note exists then an error will created; use `\f[CR]!\fP' to avoid this and truncate the existing file.
+\fRCreates a new note file. If file extension is not specified then it will use the default (see notesrc). If additional file(s) are specified in the command line will be inserted on the final note. Use it with `\f[CR]-e\fP' to invoke the editor or `\f[CR]-\fP' to get input from \fIstdin\fP. If the name is already used in this section, then an error will occurred; use `\f[CR]!\fP' suffix to truncate the existing file.
 .PP
 .TP
 \fB-A, --append

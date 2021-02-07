@@ -6,9 +6,10 @@ notes - manages note files.
 notes [*OPTIONS*] [-s *section*] {*note* | *pattern*} [-|*file* ...]
 
 ## DESCRIPTION
-notes uses a directory to store users files for notes. The directory can be
-a **Nextcloud®** Notes. The files can be plain text, markdown or anything else that
-can configured by *rule* command in configuration file (see notesrc(5)).
+Your notes (files) are stored in a directory (and its subdirectories).
+This directory can be the **Nextcloud®**'s (`~/Nextcloud/Notes`).
+The files can be plain text, markdown or anything else that
+can configured by the *rule* command in the configuration file (see notesrc(5)).
 If the *note* is `-` then it reads from *stdin*.
 
 Running program without arguments, enters in TUI mode (ncurses interface).
@@ -23,7 +24,7 @@ The program was designed to behave as `man` command.
 > # show all pages that match 'sig11'
 > notes sig11 -a
 
-> # show page of section 'unix' that match 'sig11'
+> # show page of section (i.e. subdirectory) 'unix' that match 'sig11'
 > notes -s unix sig11
 ```
 
@@ -31,40 +32,40 @@ The program was designed to behave as `man` command.
 
 #### -a[!], --add[!]
 Creates a new note file. If file extension is not specified then it will use the
-default (see notesrc). If additional file(s) are specified in the command line
+default (see notesrc).
+If additional file(s) are specified in the command line
 will be inserted on the final note.
-Use it with `-e` to invoke the editor or with `-` to get input from *stdin*.
-If note exists then an error will created; use `!` to avoid this and truncate
-the existing file.
+Use it with `-e` to invoke the editor or  `-` to get input from *stdin*.
+If the name is already used in this section, then an error will
+occurred; use `!` suffix to truncate the existing file.
 
 #### -A, --append
-Same as `-a` but appends to an existing (or not) note. If note does not exists
-then it will be created.
+Same as `-a` but instead of overwriting, the new note is appended to the file.
+If note does not exists then it will be created.
 
 #### -v, --view
-Shows the *note* with the default *$PAGER* or the one specified by `rule` (see
-notesrc).
+Shows the *note* with the default *$PAGER* if one is not specified in the configuration file.
 
 #### -p, --print
 Same as `-v` but writes the contents to *stdout*.
 
 #### -e, --edit
-Loads the *note* to the default *$EDITOR* or the one specified by `rule` (see
-notesrc).
+Loads the *note* to the default *$EDITOR* if one is not specified in the configuration file.
 
 #### -l, --list
-Displays the notes names that match to the *pattern*.
+Displays the notes names that match *pattern*.
 
 #### -f, --files
-Same as `-l` but prints out the full-path filenames instead of their titles.
+Same as `-l` but prints out the full path filenames in addition to the titles.
 
 #### -d, --delete
 Deletes a note.
 
 #### -r, --rename
-Renames (and/or moves) note. A second parameter is required to specify the new
+Renames and/or moves a note. A second parameter is required to specify the new
 name. If file extension is specified in the new name, then it will use it.
-Rename can also change the section if separated by '/' before the name.
+*rename* it can also change the section if separated by '/' before the name,
+e.g., `section3/new-name`.
 
 #### --all
 Displays all notes that found (-p, -e, -v).
