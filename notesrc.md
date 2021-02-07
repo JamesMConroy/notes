@@ -32,6 +32,12 @@ note - name. Actually this is used only when you add new notes.
 deftype=txt
 ```
 
+#### onstart = <command-line>
+Command to execute at startup of TUI or by option `--onstart`.
+
+#### onexit = <command-line>
+Command to execute at exit of TUI or by option `--onexit`.
+
 ## STATEMENTS
 
 #### rule *action* *pattern* *command*

@@ -70,6 +70,8 @@ static char conf[PATH_MAX];	// app configuration file
 static char current_section[NAME_MAX];
 static char current_filter[NAME_MAX];
 static char default_ftype[NAME_MAX];
+static char onstart_cmd[LINE_MAX];
+static char onexit_cmd[LINE_MAX];
 static list_t *exclude;
 
 // returns true if the string 'str' is value of true
@@ -184,6 +186,8 @@ var_t var_table[] = {
 	{ "notebook", ndir },
 	{ "backupdir", bdir },
 	{ "deftype", default_ftype },
+	{ "onstart", onstart_cmd },
+	{ "onexit", onexit_cmd },
 	{ NULL, NULL } };
 
 // table of commands
@@ -743,6 +747,9 @@ void explorer() {
 	char	prompt[LINE_MAX];
 	char	status[LINE_MAX];
 	
+	if ( strlen(onstart_cmd) )
+		system(onstart_cmd);
+
 	ex_build();
 	tagged = list_create();
 
@@ -1065,6 +1072,8 @@ void explorer() {
 	nc_close();
 	tagged = list_destroy(tagged);
 	free(t_notes);
+	if ( strlen(onexit_cmd) )
+		system(onexit_cmd);
 	}
 
 // === main =================================================================
@@ -1208,6 +1217,8 @@ int main(int argc, char *argv[]) {
 					else if ( strcmp(argv[i], "--section") == 0 )	{ asw = current_section; sectionf = true; }
 					else if ( strcmp(argv[i], "--help") == 0 )		{ puts(usage); return exit_code; }
 					else if ( strcmp(argv[i], "--version") == 0 )	{ puts(verss); return exit_code; }
+					else if ( strcmp(argv[i], "--onstart") == 0 )	{ if ( strlen(onstart_cmd) ) return system(onstart_cmd); }
+					else if ( strcmp(argv[i], "--onexit") == 0 )	{ if ( strlen(onexit_cmd) ) return system(onexit_cmd); }
 					return exit_code;
 				default:
 					fprintf(stderr, "unknown option [%c]\n", argv[i][j]);

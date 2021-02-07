@@ -30,6 +30,14 @@ deftype=txt
 .EE
 .RE
 .PP
+.TP
+\fBonstart = <command-line>
+\fRCommand to execute at startup of TUI or by option `\f[CR]--onstart\fP'.
+.PP
+.TP
+\fBonexit = <command-line>
+\fRCommand to execute at exit of TUI or by option `\f[CR]--onexit\fP'.
+.PP
 .SH STATEMENTS
 .TP
 \fBrule *action* *pattern* *command*
