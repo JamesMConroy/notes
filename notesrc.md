@@ -3,9 +3,10 @@
 notesrc - NDC's notes configuration file.
 
 ## DESCRIPTION
-*notes* uses a directory to store users files for notes. The directory can be
-a **Nextcloud®** Notes. The files can be plain text, markdown or anything else that
-can configured by *rule* statements in configuration file.
+*notes* uses a directory and its subdirectories to store the user's notes in files.
+See `notebook` bellow.
+The files can be plain text, markdown or anything else that
+can configured by *rule* statements in the configuration file.
 
 During startup *notes* reads the configuration file
 *$XDG\_CONFIG\_HOME/notes/noterc* or *~/.config/notes/noterc* or *~/.notesrc*;
@@ -25,8 +26,8 @@ If *backupdir* is omitted then environment variable *$BACKUPDIR* will be used if
 otherwise no backup will be used.
 
 #### deftype = <extension>
-This is the default file type that used when user did not specify one in the
-note - name. Actually this is used only when you add new notes.
+This is the default extension file name when the user does not specify one in a new
+note - name.
 
 ```
 deftype=txt
@@ -41,8 +42,8 @@ Command to execute at exit of TUI or by option `--onexit`.
 ## STATEMENTS
 
 #### rule *action* *pattern* *command*
-*Rules* defines how the program will react of each file type.
-The are two *actions* for now, the *view* and the *edit*.
+*Rules* defines how the program will act of each file type.
+There are two *actions* for now, *view* and *edit*.
 
 ```
 rule view *.[0-9] man
@@ -54,7 +55,7 @@ rule edit *       $EDITOR
 ```
 
 #### exclude *pattern* [*pattern* ...]
-File match patterns of files / directories to ignore.
+File match patterns of files and/or directories to ignore.
 
 ```
 exclude .git trash *.sqlite
@@ -62,7 +63,7 @@ exclude .git trash *.sqlite
 
 #### umenu *label* ; *command*
 Specifies user-defined menu item to deal with current or tagged files.
-The command will get the list of files as parameter.
+The command will get the full path files as parameters.
 Use the 'm' key to invoke the user-defined menu.
 
 ```

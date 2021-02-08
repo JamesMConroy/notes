@@ -36,7 +36,7 @@ default (see notesrc).
 If additional files are specified in the command line, their contents will be inserted into the new note.
 Use it with `-e` to invoke the editor or `-` to get input from *stdin*.
 If the name is already used in this section, then an error will be issued;
-use `!` suffix to truncate the existing file.
+use `!` suffix to replace the existing file.
 
 ```
 # Example 1: cat yyy zzz >> xxx
