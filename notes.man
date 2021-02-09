@@ -17,14 +17,14 @@ The program was designed to behave as `\f[CR]man\fP' command.
 .RS 4
 .EX
 
-> # show note 'sig11'; if not found it will display all titles containing
+> # show note 'sig11'; if not found it will display all titles beginning with
 > # the string
 > notes sig11
 
-> # show all pages that match 'sig11'
+> # show all pages whose title begins with 'sig11'
 > notes sig11 -a
 
-> # show page of section (i.e. subdirectory) 'unix' that match 'sig11'
+> # show page of section (i.e. subdirectory) 'unix' whose title begins with 'sig11'
 > notes -s unix sig11
 
 .EE
@@ -33,7 +33,7 @@ The program was designed to behave as `\f[CR]man\fP' command.
 .SH OPTIONS
 .TP
 \fB-a[!], --add[!]
-\fRCreates a new note file. If file extension is not specified then it will use the default (see notesrc). If additional files are specified in the command line, their contents will be inserted into the new note. Use it with `\f[CR]-e\fP' to invoke the editor or `\f[CR]-\fP' to get input from \fIstdin\fP. If the name is already used in this section, then an error will be issued; use `\f[CR]!\fP' suffix to truncate the existing file.
+\fRCreates a new note file. If file extension is not specified then it will be used the default (see notesrc). If additional files are specified in the command line, their contents will be inserted into the new note. Use it with `\f[CR]-e\fP' to invoke the editor or `\f[CR]-\fP' to get input from \fIstdin\fP. If the name is already used in this section, then an error will be issued; use `\f[CR]!\fP' suffix to replace the existing file.
 .PP
 .RS 4
 .EX
@@ -52,7 +52,7 @@ The program was designed to behave as `\f[CR]man\fP' command.
 .PP
 .TP
 \fB-A, --append
-\fRSame as `\f[CR]-a\fP' but instead of overwriting, the new note is appended to the file. If note does not exists then it will be created.
+\fRSame as `\f[CR]-a\fP' but instead of overwriting, the new note is appended to the file. If note does not exist then it will be created.
 .PP
 .TP
 \fB-v, --view
@@ -80,7 +80,7 @@ The program was designed to behave as `\f[CR]man\fP' command.
 .PP
 .TP
 \fB-r, --rename
-\fRRenames and/or moves a note. A second parameter is required to specify the new name. If file extension is specified in the new name, then it will use it.\fIrename\fP it can also change the section if separated by '/' before the name, e.g.,`\f[CR]section3/new-name\fP'.
+\fRRenames and/or moves a note. A second parameter is required to specify the new name. If file extension is specified in the new name, then it will use it.\fIrename\fP can also change the section if separated by '/' before the name, e.g.,`\f[CR]section3/new-name\fP'.
 .PP
 .TP
 \fB--all
@@ -92,15 +92,15 @@ The program was designed to behave as `\f[CR]man\fP' command.
 .PP
 .TP
 \fB--version
-\fRDisplays the program version, copyright and license information and exists.
+\fRDisplays the program version, copyright and license information and exits.
 .PP
 .TP
 \fB--onstart
-\fRExecutes the command defined by `\f[CR]onstart\fP' in the configuration file. This option is useful when custom synchronization needed.
+\fRExecutes the command defined by `\f[CR]onstart\fP' in the configuration file. This option is useful when custom synchronization is needed.
 .PP
 .TP
 \fB--onexit
-\fRExecutes the command defined by `\f[CR]onexit\fP' in the configuration file. This option is useful when custom synchronization needed.
+\fRExecutes the command defined by `\f[CR]onexit\fP' in the configuration file. This option is useful when custom synchronization is needed.
 .PP
 .SH COPYRIGHT
 Copyright © 2020-2021 Nicholas Christopoulos.
