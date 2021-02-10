@@ -51,7 +51,7 @@ The program was designed to behave as `\f[CR]man\fP' command.
 .RE
 .PP
 .TP
-\fB-A, --append
+\fB-a[!]+, --append[!]
 \fRSame as `\f[CR]-a\fP' but instead of overwriting, the new note is appended to the file. If note does not exist then it will be created.
 .PP
 .TP

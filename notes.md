@@ -49,7 +49,7 @@ use `!` suffix to replace the existing file.
 > cat ~/.notesrc | notes -a! notesrc -
 ```
 
-#### -A, --append
+#### -a[!]+, --append[!]
 Same as `-a` but instead of overwriting, the new note is appended to the file.
 If note does not exist then it will be created.
 
