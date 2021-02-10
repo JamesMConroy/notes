@@ -12,7 +12,7 @@ Your notes (files) are stored in a directory (and its subdirectories). This dire
 .PP
 Running program without arguments, enters in TUI mode (ncurses interface).
 .PP
-The program was designed to behave as `\f[CR]man\fP' command.
+The program was designed to behave as the `\f[CR]man\fP' command.
 .PP
 .RS 4
 .EX
@@ -33,7 +33,7 @@ The program was designed to behave as `\f[CR]man\fP' command.
 .SH OPTIONS
 .TP
 \fB-a[!], --add[!]
-\fRCreates a new note file. If file extension is not specified then it will be used the default (see notesrc). If additional files are specified in the command line, their contents will be inserted into the new note. Use it with `\f[CR]-e\fP' to invoke the editor or `\f[CR]-\fP' to get input from \fIstdin\fP. If the name is already used in this section, then an error will be issued; use `\f[CR]!\fP' suffix to replace the existing file.(see clobber on notesrc(5))
+\fRCreates a new note file. If file extension is not specified then it will be used the default (see notesrc). If additional files are specified in the command line, their contents will be inserted into the new note. Use it with `\f[CR]-e\fP' to invoke the editor or `\f[CR]-\fP' to get input from \fIstdin\fP. If the name is already used in this section, then an error will be issued; use `\f[CR]!\fP' option to replace the existing file, or set the clobber variable to `\f[CR]false\fP' in the configuration file.(see notesrc(5))
 .PP
 .RS 4
 .EX
@@ -52,7 +52,7 @@ The program was designed to behave as `\f[CR]man\fP' command.
 .PP
 .TP
 \fB-a[!]+, --append[!]
-\fRSame as `\f[CR]-a\fP' but instead of overwriting, the new note is appended to the file. If the name does not exist, then an error will be issued; use `\f[CR]!\fP' suffix to create it.(see clobber on notesrc(5))
+\fRSame as `\f[CR]-a\fP' but instead of overwriting, the new note is appended to the file. If the name does not exist, then an error will be issued; use `\f[CR]!\fP' option to create it, or set the clobber variable to `\f[CR]false\fP' in the configuration file.(see notesrc(5))
 .PP
 .TP
 \fB-v, --view
@@ -72,7 +72,7 @@ The program was designed to behave as `\f[CR]man\fP' command.
 .PP
 .TP
 \fB-f, --files
-\fRSame as `\f[CR]-l\fP' but prints out the full path filenames in addition to the titles.
+\fRSame as `\f[CR]-l\fP' but prints out the full path filenames.
 .PP
 .TP
 \fB-d, --delete
@@ -84,11 +84,11 @@ The program was designed to behave as `\f[CR]man\fP' command.
 .PP
 .TP
 \fB--all
-\fRDisplays all notes that found (-p,-e,-v).
+\fRDisplays all notes that were found; it works together with `\f[CR]-p\fP',`\f[CR]-e\fP', and `\f[CR]-v\fP'.
 .PP
 .TP
 \fB-h, --help
-\fRDisplays a short-help text and exits.
+\fRDisplays a short help text and exits.
 .PP
 .TP
 \fB--version

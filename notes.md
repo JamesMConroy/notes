@@ -14,7 +14,7 @@ If the *note* is `-` then it reads from *stdin*.
 
 Running program without arguments, enters in TUI mode (ncurses interface).
 
-The program was designed to behave as `man` command.
+The program was designed to behave as the `man` command.
 
 ```
 > # show note 'sig11'; if not found it will display all titles beginning with
@@ -36,8 +36,8 @@ default (see notesrc).
 If additional files are specified in the command line, their contents will be inserted into the new note.
 Use it with `-e` to invoke the editor or `-` to get input from *stdin*.
 If the name is already used in this section, then an error will be issued;
-use `!` suffix to replace the existing file.
-(see clobber on notesrc(5))
+use `!` option to replace the existing file,
+or set the clobber variable to `false` in the configuration file. (see notesrc(5))
 
 ```
 # Example 1: cat yyy zzz >> xxx
@@ -53,8 +53,8 @@ use `!` suffix to replace the existing file.
 #### -a[!]+, --append[!]
 Same as `-a` but instead of overwriting, the new note is appended to the file.
 If the name does not exist, then an error will be issued;
-use `!` suffix to create it.
-(see clobber on notesrc(5))
+use `!` option to create it,
+or set the clobber variable to `false` in the configuration file. (see notesrc(5))
 
 #### -v, --view
 Shows the *note* with the default *$PAGER* if one is not specified in the configuration file.
@@ -69,7 +69,7 @@ Loads the *note* to the default *$EDITOR* if one is not specified in the configu
 Displays the notes names that match *pattern*.
 
 #### -f, --files
-Same as `-l` but prints out the full path filenames in addition to the titles.
+Same as `-l` but prints out the full path filenames.
 
 #### -d, --delete
 Deletes a note.
@@ -81,10 +81,10 @@ name. If file extension is specified in the new name, then it will use it.
 e.g., `section3/new-name`.
 
 #### --all
-Displays all notes that found (-p, -e, -v).
+Displays all notes that were found; it works together with `-p`, `-e`, and `-v`.
 
 #### -h, --help
-Displays a short-help text and exits.
+Displays a short help text and exits.
 
 #### --version
 Displays the program version, copyright and license information and exits.
