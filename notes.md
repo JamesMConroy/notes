@@ -37,6 +37,7 @@ If additional files are specified in the command line, their contents will be in
 Use it with `-e` to invoke the editor or `-` to get input from *stdin*.
 If the name is already used in this section, then an error will be issued;
 use `!` suffix to replace the existing file.
+(see clobber on notesrc(5))
 
 ```
 # Example 1: cat yyy zzz >> xxx
@@ -51,7 +52,9 @@ use `!` suffix to replace the existing file.
 
 #### -a[!]+, --append[!]
 Same as `-a` but instead of overwriting, the new note is appended to the file.
-If note does not exist then it will be created.
+If the name does not exist, then an error will be issued;
+use `!` suffix to create it.
+(see clobber on notesrc(5))
 
 #### -v, --view
 Shows the *note* with the default *$PAGER* if one is not specified in the configuration file.

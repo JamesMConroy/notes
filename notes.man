@@ -33,7 +33,7 @@ The program was designed to behave as `\f[CR]man\fP' command.
 .SH OPTIONS
 .TP
 \fB-a[!], --add[!]
-\fRCreates a new note file. If file extension is not specified then it will be used the default (see notesrc). If additional files are specified in the command line, their contents will be inserted into the new note. Use it with `\f[CR]-e\fP' to invoke the editor or `\f[CR]-\fP' to get input from \fIstdin\fP. If the name is already used in this section, then an error will be issued; use `\f[CR]!\fP' suffix to replace the existing file.
+\fRCreates a new note file. If file extension is not specified then it will be used the default (see notesrc). If additional files are specified in the command line, their contents will be inserted into the new note. Use it with `\f[CR]-e\fP' to invoke the editor or `\f[CR]-\fP' to get input from \fIstdin\fP. If the name is already used in this section, then an error will be issued; use `\f[CR]!\fP' suffix to replace the existing file.(see clobber on notesrc(5))
 .PP
 .RS 4
 .EX
@@ -52,7 +52,7 @@ The program was designed to behave as `\f[CR]man\fP' command.
 .PP
 .TP
 \fB-a[!]+, --append[!]
-\fRSame as `\f[CR]-a\fP' but instead of overwriting, the new note is appended to the file. If note does not exist then it will be created.
+\fRSame as `\f[CR]-a\fP' but instead of overwriting, the new note is appended to the file. If the name does not exist, then an error will be issued; use `\f[CR]!\fP' suffix to create it.(see clobber on notesrc(5))
 .PP
 .TP
 \fB-v, --view
