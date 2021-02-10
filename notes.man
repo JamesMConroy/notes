@@ -64,7 +64,7 @@ The program was designed to behave as the `\f[CR]man\fP' command.
 .PP
 .TP
 \fB-e, --edit
-\fRLoads the \fInote\fP to the default \fI$EDITOR\fP if one is not specified in the configuration file.
+\fRLoads the \fInote\fP to the default \fI$EDITOR\fP if one is not specified in the configuration file. Also, it can be used with `\f[CR]--add/--append\fP' if it is next to it.
 .PP
 .TP
 \fB-l, --list

@@ -64,6 +64,7 @@ Same as `-v` but writes the contents to *stdout*.
 
 #### -e, --edit
 Loads the *note* to the default *$EDITOR* if one is not specified in the configuration file.
+Also, it can be used with `--add/--append` if it is next to it.
 
 #### -l, --list
 Displays the notes names that match *pattern*.
