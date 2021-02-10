@@ -38,6 +38,10 @@ deftype=txt
 \fBonexit = <command-line>
 \fRCommand to execute at exit of TUI or by option `\f[CR]--onexit\fP'.
 .PP
+.TP
+\fBclobber = <boolean>
+\fRProtection of unintentionally overwrite (same as shell). Default is true.
+.PP
 .SH STATEMENTS
 .TP
 \fBrule *action* *pattern* *command*

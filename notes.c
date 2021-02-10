@@ -68,6 +68,8 @@ static char home[PATH_MAX];	// user's home directory
 static char ndir[PATH_MAX];	// app data directory (per user)
 static char bdir[PATH_MAX];	// backup directory
 static char conf[PATH_MAX];	// app configuration file
+static bool g_globber = true;
+static char sclob[64];
 static char current_section[NAME_MAX];
 static char current_filter[NAME_MAX];
 static char default_ftype[NAME_MAX];
@@ -79,7 +81,11 @@ static list_t *exclude;
 bool istrue(const char *str) {
 	const char *p = str;
 	while ( isblank(*p) ) p ++;
-	return (strchr("YT1+", toupper(*p)) != NULL);
+	if ( tolower(*p) == 'o' )
+		if ( strncasecmp(p, "on", 2) == 0 ) return true;
+	if ( isdigit(*p) )
+		if ( *p != '0' ) return true;
+	return (strchr("YT+", toupper(*p)) != NULL);
 	}
 
 // add pattern to exclude list
@@ -186,6 +192,7 @@ typedef struct { const char *name; char *value; } var_t;
 var_t var_table[] = {
 	{ "notebook", ndir },
 	{ "backupdir", bdir },
+	{ "clibber", sclob },
 	{ "deftype", default_ftype },
 	{ "onstart", onstart_cmd },
 	{ "onexit", onexit_cmd },
@@ -200,18 +207,18 @@ cmd_t cmd_table[] = {
 	{ NULL, NULL } };
 
 // assign variables
-void command_set(const char *variable, const char *value) {
+void command_set(int line, const char *variable, const char *value) {
 	for ( int i = 0; var_table[i].name; i ++ ) {
 		if ( strcmp(var_table[i].name, variable) == 0 ) {
 			strcpy(var_table[i].value, value);
 			return;
 			}
 		}
-	fprintf(stderr, "uknown variable [%s]\n", variable);
+	fprintf(stderr, "rc(%d): uknown variable [%s]\n", line, variable);
 	}
 
 // execute commands
-void command_exec(const char *command, const char *parameters) {
+void command_exec(int line, const char *command, const char *parameters) {
 	for ( int i = 0; cmd_table[i].name; i ++ ) {
 		if ( strcmp(cmd_table[i].name, command) == 0 ) {
 			if ( cmd_table[i].func_p )
@@ -219,11 +226,11 @@ void command_exec(const char *command, const char *parameters) {
 			return;
 			}
 		}
-	fprintf(stderr, "uknown command [%s]\n", command);
+	fprintf(stderr, "rc(%d): uknown command [%s]\n", line, command);
 	}
 
 // parse string line
-void parse(const char *source) {
+void parse(int line, const char *source) {
 	char name[LINE_MAX], *d = name;
 	const char *p = source;
 	while ( isblank(*p) ) p ++;
@@ -235,10 +242,10 @@ void parse(const char *source) {
 		if ( *p == '=' ) {
 			p ++;
 			while ( isblank(*p) ) p ++;
-			command_set(name, p);
+			command_set(line, name, p);
 			}
 		else
-			command_exec(name, p);
+			command_exec(line, name, p);
 		}
 	}
 
@@ -272,12 +279,16 @@ bool copy_file(const char *src, const char *trg) {
 
 // read configuration file
 void read_conf(const char *rc) {
+	int line = 0;
+	
 	if ( access(rc, R_OK) == 0 ) {
 		char buf[LINE_MAX];
 		FILE *fp = fopen(rc, "r");
 		if ( fp ) {
-			while ( fgets(buf, LINE_MAX, fp) )
-				parse(rtrim(buf));
+			while ( fgets(buf, LINE_MAX, fp) ) {
+				line ++;
+				parse(line, rtrim(buf));
+				}
 			fclose(fp);
 			}
 		}
@@ -494,11 +505,9 @@ note_t*	make_note(const char *name, const char *defsec, int flags) {
 	
 	// create the file
 	if ( flags & 0x01 ) { // create file
-		if ( (opt_flags & OPT_ADD) && !(opt_flags & OPT_NOCLOB) ) {
-			if ( access(note->file, F_OK) == 0 ) {
-				fprintf(stderr, "File '%s' already exists.\n", note->file);
+		if ( (opt_flags & OPT_ADD) && !(opt_flags & OPT_NOCLOB) && !(opt_flags & OPT_APPD) ) {
+			if ( access(note->file, F_OK) == 0 )
 				return NULL;
-				}
 			}
 		if ( (fp = fopen(note->file, "wt")) != NULL )
 			fclose(fp);
@@ -1118,6 +1127,14 @@ void init() {
 	vexpand(ndir);
 	vexpand(bdir);
 
+	//
+	if ( strlen(sclob) ) {
+		if ( istrue(sclob) )
+			g_globber = true;
+		else
+			g_globber = false;
+		}
+
 	// setting up default pager and editor
 	rule_add("view * ${PAGER:-less}");
 	rule_add("edit * ${EDITOR:-vi}");
@@ -1145,8 +1162,8 @@ static const char *usage = "\
 Usage: notes [mode] [options] [-s section] {note|pattern} [-|file(s)]\n\
 \n\
 Modes:\n\
-    -a, --add      add a new note. use `!' suffix to overwrite the note of exists. \n\
-    -A, --append   append to note\n\
+    -a, --add      add a new note. use `!' to replace it if exist. \n\
+    -a+, --append  append to note. use `!' to create it if does not exist.\n\
     -l, --list     list notes ('*' displays all)\n\
     -f, --files    same as list but displays only full pathnames (for scripts)\n\
     -v, --view     sends the note[s] to the $PAGER (see --all)\n\
@@ -1210,18 +1227,20 @@ int main(int argc, char *argv[]) {
 				case 'p': opt_flags = OPT_VIEW|OPT_PRINT; break;
 				case 'f': opt_flags |= OPT_FILES; break;
 				case 'a': opt_flags = (opt_flags & OPT_AUTO) ? OPT_ADD : opt_flags | OPT_ALL; break;
+				case 'n': opt_flags = OPT_ADD | OPT_EDIT; break;
 				case '!': opt_flags |= OPT_NOCLOB; break;
 				case 's': asw = current_section; sectionf = true; break;
 				case 'r': opt_flags = OPT_MOVE; break;
 				case 'd': opt_flags = OPT_DEL; break;
-				case 'A': opt_flags = OPT_APPD;
+				case '+': opt_flags |= OPT_APPD;
 				case 'h': puts(usage); return exit_code;
 //				case 'v': puts(verss); return exit_code;
 				case '-': // -- double minus
 					if ( strcmp(argv[i], "--all") == 0 )			{ opt_flags |= OPT_ALL; }
 					else if ( strcmp(argv[i], "--add") == 0 )		{ opt_flags = OPT_ADD; }
 					else if ( strcmp(argv[i], "--add!") == 0 )		{ opt_flags = OPT_ADD | OPT_NOCLOB; }
-					else if ( strcmp(argv[i], "--append") == 0 )	{ opt_flags = OPT_APPD; }
+					else if ( strcmp(argv[i], "--append") == 0 )	{ opt_flags = OPT_ADD | OPT_APPD; }
+					else if ( strcmp(argv[i], "--append!") == 0 )	{ opt_flags = OPT_ADD | OPT_APPD | OPT_NOCLOB; }
 					else if ( strcmp(argv[i], "--list") == 0 )		{ opt_flags = OPT_LIST; }
 					else if ( strcmp(argv[i], "--view") == 0 )		{ opt_flags = OPT_VIEW; }
 					else if ( strcmp(argv[i], "--print") == 0 )		{ opt_flags = OPT_VIEW|OPT_PRINT; }
@@ -1252,13 +1271,17 @@ int main(int argc, char *argv[]) {
 			}
 		}
 
+	//
+	if ( !g_globber )
+		opt_flags |= OPT_NOCLOB;
+
 	// no parameters
 	if ( args->head == NULL ) {
 		if ( opt_flags & OPT_LIST )
 			list_addstr(args, "*");
 		else {
 			if ( opt_flags & OPT_ADD )		{ printf("usage: notes -a new-note-name\n"); exit(EXIT_FAILURE); }
-			if ( opt_flags & OPT_APPD )		{ printf("usage: notes -A note-name\n"); exit(EXIT_FAILURE); }
+			if ( opt_flags & OPT_APPD )		{ printf("usage: notes -a+ note-name\n"); exit(EXIT_FAILURE); }
 			if ( opt_flags & OPT_DEL )		{ printf("usage: notes -d note-name\n"); exit(EXIT_FAILURE); }
 			if ( opt_flags & OPT_MOVE )		{ printf("usage: notes -r note-name new-note-name\n"); exit(EXIT_FAILURE); }
 			
@@ -1269,18 +1292,33 @@ int main(int argc, char *argv[]) {
 		}
 	cur_arg = args->head;
 
-	if ( (opt_flags & OPT_ADD) || (opt_flags & OPT_APPD) ) {
+	if ( opt_flags & OPT_ADD ) {
 		//
 		//	create/append note, $1 is the name
 		//
 		char	*name = (char *) cur_arg->data;
 		note_t	*note;
 		FILE	*fp;
+			
+		note = make_note(name, current_section, 0);
+		if ( !(opt_flags & OPT_NOCLOB ) ) {
+			if ( opt_flags & OPT_APPD ) { // append and clobber
+				if ( access(note->file, F_OK) != 0 ) {
+					fprintf(stderr, "File '%s' does not exist.\nUse '!' option to create it.\n", note->file);
+					return EXIT_FAILURE;
+					}
+				}
+			else { // add and clobber
+				if ( access(note->file, F_OK) == 0 ) {
+					fprintf(stderr, "File '%s' already exist.\nUse '!' option to replace it.\n", note->file);
+					return EXIT_FAILURE;
+					}
+				}
+			}
 		
-		note = make_note(name, current_section, 1);
 		if ( note ) {
 			// create / truncate / open-for-append file
-			if ( (fp = fopen(note->file, ((opt_flags & OPT_ADD) ? "w" : "a"))) != NULL ) {
+			if ( (fp = fopen(note->file, ((opt_flags & OPT_APPD) ? "a" : "w"))) != NULL ) {
 				exit_code = EXIT_SUCCESS;
 				cur_arg = (list_node_t *) cur_arg->next;
 				while ( cur_arg ) {
