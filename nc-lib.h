@@ -60,7 +60,7 @@ bool nc_wreadstr(WINDOW *w, char *s, int m);
 
 //
 void nc_view(const char *title, const char *body);
-int  nc_listbox(const char *title, const char **items);
+int  nc_listbox(const char *title, const char **items, int default_index /* = 0 */);
 
 #ifdef __cplusplus
 }

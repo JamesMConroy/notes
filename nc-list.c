@@ -21,7 +21,7 @@
 
 #include "nc-lib.h"
 
-int nc_listbox(const char *title, const char **items) {
+int nc_listbox(const char *title, const char **items, int defidx) {
 	int		x, y, dx, dy, c, exf = 0;
 	int		i, lines, wlines, offset;
 	int		maxlen = 0, pos = 0;
@@ -30,6 +30,8 @@ int nc_listbox(const char *title, const char **items) {
 		maxlen = MAX(maxlen, strlen(items[lines])); 
 	if ( title )
 		maxlen = MAX(maxlen, strlen(title)); 
+	if ( defidx < 0 || defidx >= lines )
+		defidx = 0;
 	
 	// outer window
 	dx = maxlen + 6;
@@ -37,21 +39,22 @@ int nc_listbox(const char *title, const char **items) {
 	x = COLS / 2 - dx / 2;
 	y = LINES / 2 - dy / 2;
 	WINDOW	*wout = newwin(dy, dx, y, x);
-	refresh();
 	keypad(wout, TRUE);
-	box(wout, 0, 0);
-	if ( title ) nc_wtitle(wout, title, 2);
 	
 	WINDOW	*w = subwin(wout, dy - 2, dx - 4, y + 1, x + 2);
+	keypad(w, TRUE);
 	wlines = dy - 4;
-	wrefresh(wout);
 
-	offset = pos = 0;
+	offset = 0;
+	pos = defidx;
 	do {
 		if ( offset > pos )	offset = pos;
 		if ( offset + lines < pos )	offset = pos - lines;
 		if ( offset < 0 ) offset = 0;
-		touchwin(wout);
+		werase(wout);
+		box(wout, 0, 0);
+		if ( title ) nc_wtitle(wout, title, 2);
+		wrefresh(wout);
 		werase(w);
 		for ( i = offset, y = 0; i < lines; i ++, y ++ ) {
 			if ( i == pos ) wattron(w, A_REVERSE);
@@ -60,7 +63,7 @@ int nc_listbox(const char *title, const char **items) {
 			}
 		wrefresh(w);
 		
-		c = getch();
+		c = wgetch(w);
 		switch ( c ) {
 		case 'q':		pos = -1; exf ++; break;
 		case '\033':	pos = -1; exf ++; break;
@@ -83,8 +86,8 @@ int nc_listbox(const char *title, const char **items) {
 			if ( pos > (lines - 1) )
 				pos = lines - 1;
 			break;
-		case 'g': case KEY_HOME:	offset = 0; break;
-		case 'G': case KEY_END:		offset = lines - 1; break;
+		case 'g': case KEY_HOME:	offset = pos = 0; break;
+		case 'G': case KEY_END:		pos = lines - 1; break;
 			}
 		} while ( !exf );
 

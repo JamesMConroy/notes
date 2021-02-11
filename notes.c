@@ -640,8 +640,15 @@ static int t_notes_cmp(const void *va, const void *vb) {
 	return strcasecmp((*a)->name, (*b)->name);
 	}
 
+// qsort callback
+static int t_str_cmp(const void *va, const void *vb) {
+	const char **a = (const char **) va;
+	const char **b = (const char **) vb;
+	return strcasecmp(*a, *b);
+	}
+
 // help
-static char *ex_help_s = "$? help, $quit, $view, $edit, $rename, $delete, $new, $filter, $tag, $untag all";
+static char *ex_help_s = "$? help, $quit, $view, $edit, $rename, $delete, $new, $/ search, $tag, $untag all";
 static char ex_help[LINE_MAX];
 static char *ex_help_long = "\
 ?, F1  ... Help. This window.\n\
@@ -662,7 +669,7 @@ f      ... Set Filter[1].\n\
 m, F2  ... Menu. Invoke user-defined menu.\n\
 x, F10 ... Execute something with current/tagged notes.\n\
 F11    ... Open notes directory in file manager.\n\
-F5     ... Rebuild list.\n\
+F5     ... Rebuild & redraw list.\n\
 \n\
 Notes:\n\
 [1] The application uses the same pattern as the shell with KSH extentions.\n\
@@ -746,6 +753,29 @@ void ex_colorize(char *dest, const char *src) {
 		}
 	*d = '\0';
 	}
+
+bool ex_select_section(char *result, const char *default_value) {
+	int i = 0, r = false;
+	char **table = (char **) list_to_table(sections);
+	qsort(table, list_count(sections), sizeof(char*), t_str_cmp);
+
+	if ( default_value ) {
+		for ( i = 0; table[i]; i ++ )
+			if ( strcasecmp(table[i], default_value) == 0 )
+				break;
+		}
+	table[0] = "(all)";
+	if ( (i = nc_listbox("Select Section", (const char **) table, i)) >= 0 ) {
+		if ( i == 0 )
+			result[0] = '\0';
+		else
+			strcpy(result, table[i]);
+		r = true;
+		}
+	free(table);
+	return r;
+	}
+
 
 //
 #define ex_presh()		{ def_prog_mode(); endwin(); }
@@ -973,49 +1003,72 @@ void explorer() {
 				}
 			break;
 		case KEY_F(25): // select current section
-			strcpy(buf, "");
-			if ( ex_input(buf, "Select section ?") ) {
-				strcpy(current_section, buf);
+			if ( ex_select_section(current_section, current_section) )
 				ex_rebuild();
-				offset = pos = 0;
-				}
 			ex_refresh();
 			break;
 		case KEY_F(26): // change section
 			if ( t_notes_count ) {
 				strcpy(buf, "");
-				if ( ex_input(buf, "Enter the new section") && strlen(buf) && (strchr(buf, '/') == NULL) ) {
-					char *new_section = strdup(buf);
-					normalize_section_name(new_section);
-					make_section(new_section);
-						
-					// add the current element to tagged list
-					if ( !list_count(tagged) )
-						list_addptr(tagged, t_notes[pos]);
-					
-					// move files
-					int succ = 0, fail = 0;
-					for ( list_node_t *cur = tagged->head; cur; cur = (list_node_t *) cur->next ) {
-						note_t *cn = (note_t *) cur->data;
-						note_backup(cn);
-						note_t *nn = make_note(cn->name, new_section, 0);
-						if ( rename(cn->file, nn->file) != 0 ) {
-							sprintf(status, "move failed");
-							fail ++;
-							}
-						else
-							succ ++;
-						free(nn);
+				if ( ex_input(buf, "Enter the new section (enter ? for listbox)") && strlen(buf) ) {
+					char *new_section = NULL, *p;
+					if ( strchr(buf, '?') != NULL ) {
+						if ( ex_select_section(buf, NULL) )
+							new_section = strdup(buf);
 						}
+					else
+						new_section = strdup(buf);
+					
+					// check file-name
+					if ( new_section ) {
+						bool err = false;
+						if ( strcmp(new_section,  ".") == 0 ) err = true;
+						if ( strcmp(new_section, "..") == 0 ) err = true;
+						for ( p = new_section; *p; p ++ ) {
+							if ( strchr("/?*\\<>|", *p) != NULL ) {
+								sprintf(status, "Illegal character (%c)", *p);
+								err = true;
+								break;
+								}
+							}
+						if ( err ) {
+							free(new_section);
+							new_section = NULL;
+							}
+						}
+					
+					if ( new_section ) { // name its ok, continue
+						normalize_section_name(new_section);
+						make_section(new_section);
+							
+						// add the current element to tagged list
+						if ( !list_count(tagged) )
+							list_addptr(tagged, t_notes[pos]);
+						
+						// move files
+						int succ = 0, fail = 0;
+						for ( list_node_t *cur = tagged->head; cur; cur = (list_node_t *) cur->next ) {
+							note_t *cn = (note_t *) cur->data;
+							note_backup(cn);
+							note_t *nn = make_note(cn->name, new_section, 0);
+							if ( rename(cn->file, nn->file) != 0 ) {
+								sprintf(status, "move failed");
+								fail ++;
+								}
+							else
+								succ ++;
+							free(nn);
+							}
 
-					// report
-					if ( succ == 1 ) sprintf(status, "one note moved%c", ((fail)?';':'.'));
-					else sprintf(status, "%d notes moved%c", succ, ((fail)?';':'.'));
-					if ( fail ) sprintf(status+strlen(status), " %d failed.", fail);
+						// report
+						if ( succ == 1 ) sprintf(status, "one note moved%c", ((fail)?';':'.'));
+						else sprintf(status, "%d notes moved%c", succ, ((fail)?';':'.'));
+						if ( fail ) sprintf(status+strlen(status), " %d failed.", fail);
 
-					// cleanup
-					list_clear(tagged);
-					free(new_section);
+						// cleanup
+						list_clear(tagged);
+						free(new_section);
+						}
 					}
 				
 				ex_rebuild();
@@ -1030,7 +1083,7 @@ void explorer() {
 		case KEY_F(11): // show in filemanager
 			{
 			char *fmans[] = { "xdg-open", "nnn", "mc", "thunar", "dolphin", NULL };
-			int idx = nc_listbox("File Manager", (const char **) fmans);
+			int idx = nc_listbox("File Manager", (const char **) fmans, 0);
 			if ( idx > -1 ) {
 				ex_presh();
 				sprintf(buf, "%s %s", fmans[idx], ndir);
@@ -1072,7 +1125,7 @@ void explorer() {
 		case KEY_F(6):	// rename
 			if ( t_notes_count ) {
 				strcpy(buf, t_notes[pos]->name);
-				if ( ex_input(buf, "Enter the new name for '%s'", t_notes[pos]->name)
+				if ( ex_input(buf, "Enter the new name ([section/]new-name[.extension])", t_notes[pos]->name)
 						&& strlen(buf)
 						&& strcmp(buf, t_notes[pos]->name) != 0 ) {
 					note_backup(t_notes[pos]);
@@ -1096,7 +1149,7 @@ void explorer() {
 				umenu_item_t **opts;
 				
 				opts = (umenu_item_t **) list_to_table(umenu);
-				if ( (idx = nc_listbox("User Menu", (const char **) opts)) > -1 ) {
+				if ( (idx = nc_listbox("User Menu", (const char **) opts, 0)) > -1 ) {
 					int tcnt = list_count(tagged);
 					if ( !tcnt )
 						list_addptr(tagged, t_notes[pos]);
@@ -1145,7 +1198,7 @@ void explorer() {
 		case '\001':
 		case '':
 			strcpy(buf, "");
-			if ( ex_input(buf, "Enter new name") && strlen(buf) ) {
+			if ( ex_input(buf, "Enter new name ([section/]new-name[.extension])") && strlen(buf) ) {
 				note_t *note = make_note(buf, current_section, (ch == 'a') ? 1 : 0);
 				if ( note ) {
 					sprintf(status, "'%s' created", note->name);
