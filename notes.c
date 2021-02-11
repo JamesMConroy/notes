@@ -566,7 +566,7 @@ void ex_status_line(const char *fmt, ...) {
 	wattron(w_inf, A_REVERSE);
 	mvwhline(w_inf, 0, 0, ' ', getmaxx(w_inf));
 	// │┃
-	nc_wprintf(w_inf, " %d notes ┃ %s ", list_count(notes), msg);
+	nc_wprintf(w_inf, "%6d ┃ %s", list_count(notes), msg);
 	wattroff(w_inf, A_REVERSE);
 	wrefresh(w_inf);
 	}
@@ -644,23 +644,24 @@ static int t_notes_cmp(const void *va, const void *vb) {
 static char *ex_help_s = "$? help, $quit, $view, $edit, $rename, $delete, $new, $filter, $tag, $untag all";
 static char ex_help[LINE_MAX];
 static char *ex_help_long = "\
-?      ... Help. This window.\n\
-q      ... Quit. Terminates the program.\n\
+?, F1  ... Help. This window.\n\
+q, ^Q  ... Quit. Terminates the program.\n\
 ENTER  ... Display the current note at $PAGER.\n\
-v      ... View. Display the current or the tagged notes at $PAGER.\n\
-e      ... Edit. Edit the current or the tagged notes with the $EDITOR.\n\
-r      ... Rename. Renames the current note.\n\
+v, F3  ... View. Display the current or the tagged notes at $PAGER.\n\
+e, F4  ... Edit. Edit the current or the tagged notes with the $EDITOR.\n\
+r  F6  ... Rename. Renames the current note.\n\
 d, DEL ... Delete. Deletes the curret or the tagged notes.\n\
-n      ... New. Invokes the $EDITOR with the new file; you have to save it.\n\
+n, ^N  ... New. Invokes the $EDITOR with the new file; you have to save it.\n\
 a      ... Add. Creates a new empty note.\n\
 s      ... Select Section.\n\
 c      ... Change section. Changes the section of the current or the tagged notes.\n\
 t, INS ... Tag/Untag current note.\n\
-u      ... Untag all.\n\
-f, /   ... Set Filter[1].\n\
+u, F9  ... Untag all.\n\
+f      ... Set Filter[1].\n\
+/, F7  ... Search[1].\n\
 m, F2  ... Menu. Invoke user-defined menu.\n\
 x, F10 ... Execute something with current/tagged notes.\n\
-F4     ... Open notes directory in file manager.\n\
+F11    ... Open notes directory in file manager.\n\
 F5     ... Rebuild list.\n\
 \n\
 Notes:\n\
@@ -750,9 +751,14 @@ void ex_colorize(char *dest, const char *src) {
 #define ex_presh()		{ def_prog_mode(); endwin(); }
 #define ex_refresh()	{ keep_status = 1; clear(); ungetch(12); }
 #define fix_offset()	{ \
+	if ( pos < 0 ) pos = 0; \
+	if ( pos >= lines ) pos = lines - 1; \
 	if ( pos > offset + lines ) offset = pos - lines; \
 	if ( offset > pos ) offset = pos; \
 	if ( offset < 0 ) offset = 0; }
+#define INF_PREFIX	10
+
+typedef enum { ex_nav, ex_search } ex_mode_t;
 
 // TUI
 void explorer() {
@@ -762,6 +768,10 @@ void explorer() {
 	char	buf[LINE_MAX];
 	char	prompt[LINE_MAX];
 	char	status[LINE_MAX];
+	char	search[NAME_MAX];
+	int		spos, slen, i, maxlen;
+	bool	insert = true;
+	ex_mode_t mode = ex_nav;
 	
 	if ( strlen(onstart_cmd) )
 		system(onstart_cmd);
@@ -770,17 +780,25 @@ void explorer() {
 	tagged = list_create();
 
 	nc_init();
+	raw();
 	ex_build_windows();
 	ex_colorize(ex_help, ex_help_s);
 	
 	status[0] = '\0';
+	search[0] = '\0';
+	spos = slen = 0;
+	maxlen = getmaxx(w_inf) - INF_PREFIX;
 	do {
 		lines = getmaxy(stdscr) - 2;
 		fix_offset();
 		ex_print_list(offset, pos);
 		ex_print_note(t_notes[pos]);
 		
-		if ( status[0] == '\0' )
+		if ( mode == ex_search ) {
+			ex_status_line("%s", search);
+			wmove(w_inf, 0, spos+(INF_PREFIX-1));
+			}
+		else if ( status[0] == '\0' )
 			ex_status_line("%s", ex_help);
 		else {
 			ex_status_line("%s", status);
@@ -791,32 +809,80 @@ void explorer() {
 			}
 		
 		// read key
-		ch = getch();
+		ch = wgetch(w_inf);
+		if ( ch == '\n' || ch == '\r' )
+			ch = KEY_ENTER;
+		if ( mode == ex_nav ) {
+			switch ( ch ) {
+			case 'q': ch = KEY_EXIT; break;
+			case 'k': ch = KEY_UP; break;
+			case 'j': ch = KEY_DOWN; break;
+			case 'h': ch = KEY_LEFT; break;
+			case 'l': ch = KEY_RIGHT; break;
+			case 'g': ch = KEY_SHOME; break;
+			case KEY_HOME: ch = KEY_SHOME; break;
+			case 'G': ch = KEY_SEND; break;
+			case KEY_END: ch = KEY_SEND; break;
+			case 't': ch = KEY_SIC; break;	// tag
+			case KEY_IC: ch = KEY_SIC; break;	// tag
+			case 'd': ch = KEY_SDC; break;	// delete
+			case KEY_DC: ch = KEY_SDC; break;	// delete
+			case '?': ch = KEY_F(1); break;	// help
+			case 'm': ch = KEY_F(2); break;	// user menu
+			case 'v': ch = KEY_F(3); break;	// view
+			case 'e': ch = KEY_F(4); break;	// edit
+			// F5 = refresh
+			case 'r': ch = KEY_F(6); break;	// rename
+			case '/': ch = KEY_F(7); break;	// search
+			case 'f': ch = KEY_F(8); break;	// filter
+			case 'u': ch = KEY_F(9); break;	// untag all
+			case 'x': ch = KEY_F(10); break; // execute command
+			case 's': ch = KEY_F(25); break; // select section
+			case 'c': ch = KEY_F(26); break; // change section
+			case 'n': ch = ''; break; // new note (invoke editor)
+			case 'a': ch = '\001'; break; // add note 
+				}
+			}
+		
 		switch ( ch ) {
 		case KEY_RESIZE:
 			ex_build_windows();
+			maxlen = getmaxx(w_inf) - INF_PREFIX;
 			break;
-		case 'q': exitf = true; break; // quit
-		case '?':
+		case KEY_EXIT:
+		case '\033':
+		case '': case '':
+			if ( mode == ex_search ) {
+				search[0] = '\0';
+				spos = 0;
+				mode = ex_nav;
+				curs_set(0);
+				strcpy(current_filter, "");
+				ex_rebuild();
+				}
+			else
+				exitf = true;
+			break;
+		case KEY_F(1):
 			nc_view("Help", ex_help_long); 
 			mvvline(0, getmaxx(stdscr) / 3, ' ', getmaxy(stdscr) - 1);
 			break;
-		case 'k': case KEY_UP:
+		case KEY_UP:
 			if ( t_notes_count )
 				{ if ( pos ) pos --; }
 			else
 				offset = pos = 0;
 			break;
-		case 'j': case KEY_DOWN:
+		case KEY_DOWN:
 			if ( t_notes_count )
 				{ if ( pos < t_notes_count - 1 ) pos ++; }
 			else
 				offset = pos = 0;
 			break;
-		case KEY_HOME: case 'g':
+		case KEY_SHOME:
 			offset = pos = 0;
 			break;
-		case KEY_END: case 'G':
+		case KEY_SEND:
 			if ( t_notes_count )
 				pos = t_notes_count - 1;
 			break;
@@ -832,19 +898,26 @@ void explorer() {
 					offset = pos = 0;
 				}
 			break;
-		case '\n': case '\r':	// enter -> view current note
-			if ( t_notes_count ) {
+		case KEY_ENTER:	// enter -> view current note
+			if ( mode == ex_search ) {
+				mode = ex_nav;
+				sprintf(current_filter, "*%s*", search);
+				curs_set(0);
+				ex_rebuild();
+				ex_refresh();
+				}
+			else if ( t_notes_count ) {
 				ex_presh();
 				rule_exec('v', t_notes[pos]->file);
 				ex_refresh();
 				}
 			break;
-		case 'u': // untag all
+		case KEY_F(9): // untag all
 			list_clear(tagged);
 			sprintf(status, "untag all.");
 			ex_refresh();
 			break;
-		case 't': case KEY_IC: // tag/untag
+		case KEY_SIC: // tag/untag
 			if ( t_notes_count ) {
 				list_node_t *node = list_findptr(tagged, t_notes[pos]);
 				if ( node )
@@ -855,7 +928,7 @@ void explorer() {
 					}
 				}
 			break;
-		case 'v': // view in pager
+		case KEY_F(3): // view in pager
 			if ( t_notes_count ) {
 				ex_presh();
 				if ( list_count(tagged) ) {
@@ -870,7 +943,7 @@ void explorer() {
 				ex_refresh();
 				}
 			break;
-		case 'f': case '/': // search/filter
+		case KEY_F(8): // filter
 			strcpy(buf, current_filter);
 			if ( ex_input(buf, "Set filter (current filter: '%s')", current_filter) ) {
 				strcpy(current_filter, buf);
@@ -879,7 +952,13 @@ void explorer() {
 				}
 			ex_refresh();
 			break;
-		case 'e': // edit
+		case KEY_F(7): // search
+			search[0] = '\0';
+			spos = slen = 0;
+			mode = ex_search;
+			curs_set(1);
+			break;
+		case KEY_F(4): // edit
 			if ( t_notes_count ) {
 				ex_presh();
 				if ( list_count(tagged) ) {
@@ -893,7 +972,7 @@ void explorer() {
 				ex_refresh();
 				}
 			break;
-		case 's': // select current section
+		case KEY_F(25): // select current section
 			strcpy(buf, "");
 			if ( ex_input(buf, "Select section ?") ) {
 				strcpy(current_section, buf);
@@ -902,7 +981,7 @@ void explorer() {
 				}
 			ex_refresh();
 			break;
-		case 'c': // change section
+		case KEY_F(26): // change section
 			if ( t_notes_count ) {
 				strcpy(buf, "");
 				if ( ex_input(buf, "Enter the new section") && strlen(buf) && (strchr(buf, '/') == NULL) ) {
@@ -948,7 +1027,7 @@ void explorer() {
 			sprintf(status, "rebuilded.");
 			ex_refresh();
 			break;
-		case KEY_F(4): // show in filemanager
+		case KEY_F(11): // show in filemanager
 			{
 			char *fmans[] = { "xdg-open", "nnn", "mc", "thunar", "dolphin", NULL };
 			int idx = nc_listbox("File Manager", (const char **) fmans);
@@ -960,7 +1039,7 @@ void explorer() {
 			ex_refresh();
 			break;
 			}
-		case 'd': case KEY_DC: // delete
+		case KEY_SDC: // delete
 			if ( t_notes_count ) {
 				strcpy(buf, "");
 				if ( list_count(tagged) )
@@ -990,7 +1069,7 @@ void explorer() {
 				ex_refresh();
 				}
 			break;
-		case 'r':	// rename
+		case KEY_F(6):	// rename
 			if ( t_notes_count ) {
 				strcpy(buf, t_notes[pos]->name);
 				if ( ex_input(buf, "Enter the new name for '%s'", t_notes[pos]->name)
@@ -1011,7 +1090,7 @@ void explorer() {
 				ex_refresh();
 				}
 			break;
-		case 'm': case KEY_F(2):
+		case KEY_F(2):
 			if ( t_notes_count && umenu->head ) {
 				int idx;
 				umenu_item_t **opts;
@@ -1039,7 +1118,7 @@ void explorer() {
 				ex_refresh();
 				}
 			break;
-		case 'x': case KEY_F(10):
+		case KEY_F(10):
 			if ( t_notes_count ) {
 				char	cmd[LINE_MAX];
 				strcpy(cmd, "");
@@ -1063,8 +1142,8 @@ void explorer() {
 				ex_refresh();
 				}
 			break;
-		case 'n':	// new note
-		case 'a':	// add a new note
+		case '\001':
+		case '':
 			strcpy(buf, "");
 			if ( ex_input(buf, "Enter new name") && strlen(buf) ) {
 				note_t *note = make_note(buf, current_section, (ch == 'a') ? 1 : 0);
@@ -1072,7 +1151,7 @@ void explorer() {
 					sprintf(status, "'%s' created", note->name);
 					ex_rebuild();
 					if ( (pos = ex_find(note->name)) == -1 ) pos = 0;
-					if ( ch == 'n' ) { // 'new' key invokes the editor, 'add' key do not
+					if ( ch == '' ) { // 'new' key invokes the editor, 'add' key do not
 						ex_presh();
 						rule_exec('e', note->file);
 						}
@@ -1082,6 +1161,54 @@ void explorer() {
 					sprintf(status, "failed: errno (%d) %s", errno, strerror(errno));
 				}
 			ex_refresh();
+			break;
+		default:
+			if ( mode == ex_search ) {
+				switch ( ch ) {
+				case KEY_LEFT:	if ( spos ) spos --; break;
+				case KEY_RIGHT:	if ( search[spos] ) spos ++; break;
+				case KEY_HOME:	spos = 0; break;
+				case KEY_END:	spos = slen; break;
+				case KEY_BACKSPACE: case 8: case 127:
+					if ( spos ) {
+						spos --; slen --;
+						for ( i = spos; search[i]; i ++ )
+							search[i] = search[i+1];
+						search[slen] = '\0';
+						}
+					break;
+				case KEY_DC:
+					if ( search[spos] ) {
+						for ( i = spos; search[i]; i ++ )
+							search[i] = search[i+1];
+						slen --;
+						}
+					break;
+				case KEY_IC:	
+					insert = !insert;
+					curs_set((insert)?1:2);
+					break;
+				default:
+					if ( slen < maxlen ) {
+						if ( insert ) {
+							for ( i = slen; i >= spos; i -- )
+								search[i+1] = search[i];
+							search[spos] = ch;
+							search[++ slen] = '\0';
+							}
+						else {
+							search[spos] = ch;
+							if ( spos == slen )
+								search[++ slen] = '\0';
+							}
+						spos ++;
+						}
+					}
+
+				// rebuild everything
+				sprintf(current_filter, "*%s*", search);
+				ex_rebuild();
+				}
 			break;
 			}
 		} while ( !exitf );
