@@ -24,8 +24,11 @@ The program was designed to behave as the `\f[CR]man\fP' command.
 > # show all pages whose title begins with 'sig11'
 > notes sig11 -a
 
-> # show page of section (i.e. subdirectory) 'unix' whose title begins with 'sig11'
+> # show page(s) of section (i.e. subdirectory) 'unix' whose title begins with 'sig11'
 > notes -s unix sig11
+
+> # search for a title with patterns
+> notes '*sig*l1*'
 
 .EE
 .RE
@@ -96,11 +99,11 @@ The program was designed to behave as the `\f[CR]man\fP' command.
 .PP
 .TP
 \fB--onstart
-\fRExecutes the command defined by `\f[CR]onstart\fP' in the configuration file. This option is useful when custom synchronization is needed.
+\fRExecutes the command defined by `\f[CR]onstart\fP' in the configuration file and returns its exit code. This option is useful when custom synchronization is needed.
 .PP
 .TP
 \fB--onexit
-\fRExecutes the command defined by `\f[CR]onexit\fP' in the configuration file. This option is useful when custom synchronization is needed.
+\fRExecutes the command defined by `\f[CR]onexit\fP' in the configuration file and returns its exit code. This option is useful when custom synchronization is needed.
 .PP
 .SH COPYRIGHT
 Copyright © 2020-2021 Nicholas Christopoulos.

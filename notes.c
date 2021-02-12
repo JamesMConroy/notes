@@ -782,7 +782,7 @@ bool ex_select_section(char *result, const char *default_value) {
 #define ex_refresh()	{ keep_status = 1; clear(); ungetch(12); }
 #define fix_offset()	{ \
 	if ( pos < 0 ) pos = 0; \
-	if ( pos >= lines ) pos = lines - 1; \
+	if ( pos >= t_notes_count ) pos = t_notes_count - 1; \
 	if ( pos > offset + lines ) offset = pos - lines; \
 	if ( offset > pos ) offset = pos; \
 	if ( offset < 0 ) offset = 0; }
