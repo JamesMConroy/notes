@@ -24,8 +24,11 @@ The program was designed to behave as the `man` command.
 > # show all pages whose title begins with 'sig11'
 > notes sig11 -a
 
-> # show page of section (i.e. subdirectory) 'unix' whose title begins with 'sig11'
+> # show page(s) of section (i.e. subdirectory) 'unix' whose title begins with 'sig11'
 > notes -s unix sig11
+
+> # search for a title with patterns
+> notes '*sig*l1*'
 ```
 
 ## OPTIONS
@@ -91,11 +94,13 @@ Displays a short help text and exits.
 Displays the program version, copyright and license information and exits.
 
 #### --onstart
-Executes the command defined by `onstart` in the configuration file.
+Executes the command defined by `onstart` in the configuration file
+and returns its exit code.
 This option is useful when custom synchronization is needed.
 
 #### --onexit
-Executes the command defined by `onexit` in the configuration file.
+Executes the command defined by `onexit` in the configuration file
+and returns its exit code.
 This option is useful when custom synchronization is needed.
 
 ## COPYRIGHT
