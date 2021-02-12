@@ -103,13 +103,15 @@ void nc_close() {
 	}
 
 void nc_color_on(WINDOW *win, int fg, int bg) {	/* set the color pair (colornum) and bold/bright (A_BOLD) */
-	wattron(win, COLOR_PAIR(nc_colornum(fg, bg)));
 	if ( is_bold(fg) ) wattron(win, A_BOLD);
+	if ( is_bold(bg) ) wattron(win, A_BLINK);
+	wattron(win, COLOR_PAIR(nc_colornum(fg, bg)));
 	}
 
 void nc_color_off(WINDOW *win, int fg, int bg) {	/* unset the color pair (colornum) and bold/bright (A_BOLD) */
 	wattroff(win, COLOR_PAIR(nc_colornum(fg, bg)));
 	if ( is_bold(fg) ) wattroff(win, A_BOLD);
+	if ( is_bold(bg) ) wattroff(win, A_BLINK);
 	}
 
 static void nc_hcon(WINDOW *win, char fg, char bg) { nc_color_on(win, c2dec(fg), c2dec(bg)); }
