@@ -1,6 +1,6 @@
 .\" x-roff document
 .do mso man.tmac
-.TH notes 1 2021-01-22 "NDC Tools Collection"
+.TH NOTES 1 2021-01-22 "NDC Tools Collection"
 .SH NAME
 notes - manages note files.
 .PP

@@ -4,7 +4,7 @@
 notes - manages note files.
 
 ## SYNOPSIS
-BSD-SYNTAX:
+SYNTAX:
 	notes
 	-s section
 	-a[!][e] name [file ...][-]

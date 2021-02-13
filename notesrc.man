@@ -1,6 +1,6 @@
 .\" x-roff document
 .do mso man.tmac
-.TH notesrc 5 2021-01-22 NDC
+.TH NOTESRC 5 2021-01-22 NDC
 .SH NAME
 notesrc - NDC's notes configuration file.
 .PP
@@ -10,6 +10,7 @@ notesrc - NDC's notes configuration file.
 During startup \fInotes\fP reads the configuration file \fI$XDG_CONFIG_HOME/notes/noterc\fP or \fI~/.config/notes/noterc\fP or \fI~/.notesrc\fP; whichever is encountered first.
 .PP
 .SH VARIABLES
+.PP
 .TP
 \fBnotebook = <directory>
 \fRThe directory where the files are located. If the directory is not specified then, if \fI~/Nextcloud/Notes\fP found, it will be used, otherwise the \fI~/.notes\fP will be used.
@@ -43,6 +44,7 @@ deftype=txt
 \fRProtection of unintentionally overwrite (same as shell). Default is true.
 .PP
 .SH STATEMENTS
+.PP
 .TP
 \fBrule *action* *pattern* *command*
 \fR\fIRules\fP defines how the program will act of each file type. There are two \fIactions\fP for now,\fIview\fP and \fIedit\fP.

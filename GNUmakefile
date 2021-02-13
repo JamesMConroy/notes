@@ -12,7 +12,7 @@ LDLIBS  := -lncurses
 all: $(APPNAME)
 
 clean:
-	-rm -f *.o $(APPNAME) $(APPNAME).1 $(APPNAME).1.gz $(APPNAME)rc.5.gz > /dev/null
+	-rm -f *.o $(APPNAME) $(APPNAME).man $(APPNAME).1.gz $(APPNAME)rc.man $(APPNAME)rc.5.gz > /dev/null
 
 $(APPMODS): %.o: %.c
 
