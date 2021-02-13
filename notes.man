@@ -5,8 +5,19 @@
 notes - manages note files.
 .PP
 .SH SYNOPSIS
-notes [\fIOPTIONS\fP][-s \fIsection\fP]{\fInote\fP |\fIpattern\fP}[-|*file*...]
-.PP
+.SY notes
+.OP \-s section
+.OP \-a[!][e] name\fR\ \fI\fB[\fIfile\fR\ \fI\fB.\fI\fB.\fI\fB.\fI\fB]\fI\fB[\fI\fB-\fI\fB]\fI
+.OP \-a[!]+[e] name\fR\ \fI\fB[\fIfile\fR\ \fI\fB.\fI\fB.\fI\fB.\fI\fB]\fI\fB[\fI\fB-\fI\fB]\fI
+.OP \-e[a] \fB{\fIname\fB|\fIpattern\fB}\fI
+.OP \-v[a] \fB{\fIname\fB|\fIpattern\fB}\fI
+.OP \-p[a] \fB{\fIname\fB|\fIpattern\fB}\fI
+.OP \-l \fB[\fIpattern\fB]\fI
+.OP \-f pattern
+.OP \-d[a] \fB{\fIname\fB|\fIpattern\fB}\fI
+.OP \-r old\fB-\fIname\fR\ \fInew\fB-\fIname
+.RI [pattern]
+.YS
 .SH DESCRIPTION
 Your notes (files) are stored in a directory (and its subdirectories). This directory can be the \fBNextcloud®\fP's (`\f[CR]~/Nextcloud/Notes\fP'). The files can be plain text, markdown or anything else that can configured by the \fIrule\fP command in the configuration file (see notesrc(5)). If the \fInote\fP is `\f[CR]-\fP' then it reads from \fIstdin\fP.
 .PP
@@ -34,6 +45,7 @@ The program was designed to behave as the `\f[CR]man\fP' command.
 .RE
 .PP
 .SH OPTIONS
+.PP
 .TP
 \fB-a[!], --add[!]
 \fRCreates a new note file. If file extension is not specified then it will be used the default (see notesrc). If additional files are specified in the command line, their contents will be inserted into the new note. Use it with `\f[CR]-e\fP' to invoke the editor or `\f[CR]-\fP' to get input from \fIstdin\fP. If the name is already used in this section, then an error will be issued; use `\f[CR]!\fP' option to replace the existing file, or set the clobber variable to `\f[CR]false\fP' in the configuration file.(see notesrc(5))
@@ -86,8 +98,8 @@ The program was designed to behave as the `\f[CR]man\fP' command.
 \fRRenames and/or moves a note. A second parameter is required to specify the new name. If file extension is specified in the new name, then it will use it.\fIrename\fP can also change the section if separated by '/' before the name, e.g.,`\f[CR]section3/new-name\fP'.
 .PP
 .TP
-\fB--all
-\fRDisplays all notes that were found; it works together with `\f[CR]-p\fP',`\f[CR]-e\fP', and `\f[CR]-v\fP'.
+\fB-a, --all
+\fRDisplays all notes that were found; it works together with `\f[CR]-v\fP',`\f[CR]-p\fP',`\f[CR]-e\fP', and `\f[CR]-d\fP'. Do not use it as first option because it means `\f[CR]--add\fP'.
 .PP
 .TP
 \fB-h, --help

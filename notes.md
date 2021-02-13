@@ -1,9 +1,22 @@
 # notes 1 2021-01-22 "NDC Tools Collection"
+
 ## NAME
 notes - manages note files.
 
 ## SYNOPSIS
-notes [*OPTIONS*] [-s *section*] {*note* | *pattern*} [-|*file* ...]
+BSD-SYNTAX:
+	notes
+	-s section
+	-a[!][e] name [file ...][-]
+	-a[!]+[e] name [file ...][-]
+	-e[a] {name|pattern}
+	-v[a] {name|pattern}
+	-p[a] {name|pattern}
+	-l [pattern]
+	-f pattern
+	-d[a] {name|pattern}
+	-r old-name new-name
+	[pattern]
 
 ## DESCRIPTION
 Your notes (files) are stored in a directory (and its subdirectories).
@@ -84,8 +97,9 @@ name. If file extension is specified in the new name, then it will use it.
 *rename* can also change the section if separated by '/' before the name,
 e.g., `section3/new-name`.
 
-#### --all
-Displays all notes that were found; it works together with `-p`, `-e`, and `-v`.
+#### -a, --all
+Displays all notes that were found; it works together with `-v`, `-p`, `-e`, and `-d`.
+Do not use it as first option because it means `--add`.
 
 #### -h, --help
 Displays a short help text and exits.
