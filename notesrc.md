@@ -50,12 +50,12 @@ Default is true.
 There are two *actions* for now, *view* and *edit*.
 
 ```
-rule view *.[0-9] man
-rule view *.man   man
-rule view *.md    bat
-rule view *.txt   less
-rule view *.pdf   zathura
-rule edit *       $EDITOR
+rule view *.[0-9] man %f
+rule view *.man   man %f
+rule view *.md    bat %f
+rule view *.txt   less %f
+rule view *.pdf   zathura %f
+rule edit *       $EDITOR %f
 ```
 
 #### exclude *pattern* [*pattern* ...]

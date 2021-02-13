@@ -124,12 +124,12 @@ void umenu_add(const char *pars) {
 // === configuration & interpreter ==========================================
 // === rules ================================================================
 
-// rule view *.[0-9] man
-// rule view *.man   man
-// rule view *.md    bat
-// rule view *.txt   less
-// rule view *.pdf   okular
-// rule edit *       $EDITOR
+// rule view *.[0-9] man %f
+// rule view *.man   man %f
+// rule view *.md    bat %f
+// rule view *.txt   less %f
+// rule view *.pdf   okular %f
+// rule edit *       $EDITOR %f
 typedef struct { int code; char pattern[PATH_MAX], command[LINE_MAX]; } rule_t;
 static list_t *rules;
 
@@ -165,6 +165,42 @@ void rule_add(const char *pars) {
 		}
 	}
 
+//
+int note_shell(const char *precmd, const char *files) {
+	const char *p = precmd, *s;
+	char dest[LINE_MAX], *d;
+	bool sq = false, dq = false;
+	
+	setenv("NOTESDIR", ndir, 1);
+	setenv("NOTESFILES", files, 1);
+	d = dest;
+	while ( *p ) {
+		if ( *p == '\'' )
+			sq = !sq;
+		else if ( !sq ) {
+			if ( *p == '\"' )
+				dq = !dq;
+			else {
+				if ( *p == '%' ) {
+					switch ( *(p+1) ) {
+					case '%': // %%
+						*d ++ = '%';
+						p += 2;
+						continue;
+					case 'f': // files
+						for ( s = files; *s; *d ++ = *s ++ );
+						p += 2;
+						continue;
+						}
+					}
+				}
+			}
+		*d ++ = *p ++;
+		}
+	*d = '\0';
+	return system(dest);
+	}
+
 // execute rule for the file 'fn'
 bool rule_exec(int action, const char *fn) {
 	const char *base;
@@ -175,9 +211,9 @@ bool rule_exec(int action, const char *fn) {
 	while ( cur ) {
 		rule_t *rule = (rule_t *) cur->data;
 		if ( rule->code == action && fnmatch(rule->pattern, base, FNM_PATHNAME | FNM_PERIOD | FNM_EXTMATCH) == 0 ) {
-			char cmd[LINE_MAX];
-			snprintf(cmd, LINE_MAX, "%s '%s'", rule->command, fn);
-			system(cmd);
+			char file[PATH_MAX];
+			snprintf(file, PATH_MAX, "'%s'", fn);
+			note_shell(rule->command, file);
 			return true;
 			}
 		cur = (list_node_t *) cur->next;
@@ -649,7 +685,7 @@ static int t_str_cmp(const void *va, const void *vb) {
 	}
 
 // help
-static char *ex_help_s = "$? help, $quit, $view, $edit, $rename, $delete, $new, $/ search, $tag, $untag all";
+static char *ex_help_s = "$? help, $quit, $view, $edit, $rename, $delete, $new, $/ search, $section, $tag, $untag all";
 static char ex_help[LINE_MAX];
 static char *ex_help_long = "\
 ?, F1  ... Help. This window.\n\
@@ -777,6 +813,31 @@ bool ex_select_section(char *result, const char *default_value) {
 	return r;
 	}
 
+//
+void vstrcat(char *buf, ...) {
+	va_list ap;
+	const char *s;
+
+	va_start(ap, buf);
+	while ( (s = va_arg(ap, const char *)) != NULL )
+		strcat(buf, s);
+	va_end(ap);
+	}
+
+//
+int ex_tagged_shell(const char *cmd, list_t *tagged) {
+	char files[LINE_MAX];
+	const char *p;
+
+	files[0] = '\0';
+	for ( list_node_t *cur = tagged->head; cur; cur = (list_node_t *) cur->next ) {
+		p = ((note_t *) (cur->data))->file;
+		if ( cur != tagged->head ) // add separator
+			strcat(files, " ");
+		vstrcat(files, "'", p, "'", NULL);
+		}
+	return note_shell(cmd, files);
+	}
 
 //
 #define ex_presh()		{ def_prog_mode(); endwin(); }
@@ -962,13 +1023,8 @@ void explorer() {
 		case KEY_F(3): // view in pager
 			if ( t_notes_count ) {
 				ex_presh();
-				if ( list_count(tagged) ) {
-					strcpy(buf, "$PAGER");
-					for ( list_node_t *cur = tagged->head; cur; cur = (list_node_t *) cur->next )
-						{ strcat(buf, " '"); strcat(buf, ((note_t *) (cur->data))->file); strcat(buf, "'"); }
-					setenv("NOTES_LIST", buf, 1);
-					system(buf);
-					}
+				if ( list_count(tagged) )
+					ex_tagged_shell("$PAGER %f", tagged);
 				else
 					rule_exec('v', t_notes[pos]->file);
 				ex_refresh();
@@ -992,12 +1048,8 @@ void explorer() {
 		case KEY_F(4): // edit
 			if ( t_notes_count ) {
 				ex_presh();
-				if ( list_count(tagged) ) {
-					strcpy(buf, "$EDITOR");
-					for ( list_node_t *cur = tagged->head; cur; cur = (list_node_t *) cur->next )
-						{ strcat(buf, " '"); strcat(buf, ((note_t *) (cur->data))->file); strcat(buf, "'"); }
-					system(buf);
-					}
+				if ( list_count(tagged) )
+					ex_tagged_shell("$EDITOR %f", tagged);
 				else
 					rule_exec('e', t_notes[pos]->file);
 				ex_refresh();
@@ -1087,7 +1139,7 @@ void explorer() {
 			int idx = nc_listbox("File Manager", (const char **) fmans, 0);
 			if ( idx > -1 ) {
 				ex_presh();
-				sprintf(buf, "%s %s", fmans[idx], ndir);
+				sprintf(buf, "%s '%s'", fmans[idx], ndir);
 				system(buf);
 				}
 			ex_refresh();
@@ -1154,15 +1206,11 @@ void explorer() {
 					int tcnt = list_count(tagged);
 					if ( !tcnt )
 						list_addptr(tagged, t_notes[pos]);
-					strcpy(buf, opts[idx]->cmd);
-					for ( list_node_t *cur = tagged->head; cur; cur = (list_node_t *) cur->next )
-						{ strcat(buf, " '"); strcat(buf, ((note_t *) (cur->data))->file); strcat(buf, "'"); }
 					
 					clear();
 					refresh();
 					ex_presh();
-					printf("Executing [%s]\n\n", buf);
-					system(buf);
+					ex_tagged_shell(opts[idx]->cmd, tagged);
 					printf("\nPress any key to return...\n");
 					getch();
 					if ( !tcnt )
@@ -1176,18 +1224,14 @@ void explorer() {
 			if ( t_notes_count ) {
 				char	cmd[LINE_MAX];
 				strcpy(cmd, "");
-				if ( ex_input(cmd, "Enter command") && strlen(cmd) ) {
+				if ( ex_input(cmd, "Enter command (use '%f' for files)") && strlen(cmd) ) {
 					int tcnt = list_count(tagged);
 					if ( !tcnt )
 						list_addptr(tagged, t_notes[pos]);
-					strcpy(buf, cmd);
-					for ( list_node_t *cur = tagged->head; cur; cur = (list_node_t *) cur->next )
-						{ strcat(buf, " '"); strcat(buf, ((note_t *) (cur->data))->file); strcat(buf, "'"); }
 					clear();
 					refresh();
 					ex_presh();
-					printf("Executing [%s]\n\n", buf);
-					system(buf);
+					ex_tagged_shell(cmd, tagged);
 					printf("\nPress any key to return...\n");
 					getch();
 					if ( !tcnt )
@@ -1317,11 +1361,8 @@ void init() {
 		}
 
 	// setting up default pager and editor
-	rule_add("view * ${PAGER:-less}");
-	rule_add("edit * ${EDITOR:-vi}");
-
-	// environment variables for subshells
-	setenv("NOTESDIR", ndir, 1);
+	rule_add("view * ${PAGER:-less} %f");
+	rule_add("edit * ${EDITOR:-vi} %f");
 	}
 
 //
