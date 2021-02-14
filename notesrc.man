@@ -5,7 +5,7 @@
 notesrc - NDC's notes configuration file.
 .PP
 .SH DESCRIPTION
-\fInotes\fP uses a directory and its subdirectories to store the user's notes in files. See `\f[CR]notebook\fP' bellow. The files can be plain text, markdown or anything else that can configured by \fIrule\fP statements in the configuration file.
+\fInotes\fP uses a directory and its subdirectories to store the user's notes in files. See ‘\f[CR]notebook\fP’ bellow. The files can be plain text, markdown or anything else that can configured by \fIrule\fP statements in the configuration file.
 .PP
 During startup \fInotes\fP reads the configuration file \fI$XDG_CONFIG_HOME/notes/noterc\fP or \fI~/.config/notes/noterc\fP or \fI~/.notesrc\fP; whichever is encountered first.
 .PP
@@ -30,11 +30,11 @@ deftype=txt
 .RE
 .TP
 \fBonstart = <command-line>
-\fRCommand to execute at startup of TUI or by option `\f[CR]--onstart\fP'.
+\fRCommand to execute at startup of TUI or by option ‘\f[CR]--onstart\fP’.
 .PP
 .TP
 \fBonexit = <command-line>
-\fRCommand to execute at exit of TUI or by option `\f[CR]--onexit\fP'.
+\fRCommand to execute at exit of TUI or by option ‘\f[CR]--onexit\fP’.
 .PP
 .TP
 \fBclobber = <boolean>
