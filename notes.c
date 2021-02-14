@@ -938,7 +938,9 @@ void explorer() {
 		
 		switch ( ch ) {
 		case KEY_RESIZE:
+		case 12:
 			ex_build_windows();
+			mvvline(0, getmaxx(stdscr) / 3, ' ', getmaxy(stdscr) - 1);
 			maxlen = getmaxx(w_inf) - INF_PREFIX;
 			break;
 		case KEY_EXIT:
@@ -956,8 +958,8 @@ void explorer() {
 				exitf = true;
 			break;
 		case KEY_F(1):
-			nc_view("Help", ex_help_long); 
-			mvvline(0, getmaxx(stdscr) / 3, ' ', getmaxy(stdscr) - 1);
+			nc_view("Help", ex_help_long);
+			ex_refresh();
 			break;
 		case KEY_UP:
 			if ( t_notes_count )
