@@ -25,46 +25,30 @@ Running program without arguments, enters in TUI mode (ncurses interface).
 .PP
 The program was designed to behave as the `\f[CR]man\fP' command.
 .PP
-.RS 4
+.RS
 .EX
-
-> # show note 'sig11'; if not found it will display all titles beginning with
-> # the string
-> notes sig11
-
-> # show all pages whose title begins with 'sig11'
-> notes sig11 -a
-
 > # show page(s) of section (i.e. subdirectory) 'unix' whose title begins with 'sig11'
 > notes -s unix sig11
 
-> # search for a title with patterns
+> # search and show notes for a title with patterns
 > notes '*sig*l1*'
-
 .EE
 .RE
-.PP
 .SH OPTIONS
 .PP
 .TP
 \fB-a[!], --add[!]
 \fRCreates a new note file. If file extension is not specified then it will be used the default (see notesrc). If additional files are specified in the command line, their contents will be inserted into the new note. Use it with `\f[CR]-e\fP' to invoke the editor or `\f[CR]-\fP' to get input from \fIstdin\fP. If the name is already used in this section, then an error will be issued; use `\f[CR]!\fP' option to replace the existing file, or set the clobber variable to `\f[CR]false\fP' in the configuration file.(see notesrc(5))
 .PP
-.RS 4
+.RS
 .EX
-
-# Example 1: cat yyy zzz >> xxx
+# example 1: cat yyy zzz > xxx
 > notes -a xxx yyy zzz
 
 # example 2:
-> echo "hello world" | notes -a xxx -
-
-# example 3:
 > cat ~/.notesrc | notes -a! notesrc -
-
 .EE
 .RE
-.PP
 .TP
 \fB-a[!]+, --append[!]
 \fRSame as `\f[CR]-a\fP' but instead of overwriting, the new note is appended to the file. If the name does not exist, then an error will be issued; use `\f[CR]!\fP' option to create it, or set the clobber variable to `\f[CR]false\fP' in the configuration file.(see notesrc(5))

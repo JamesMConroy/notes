@@ -23,14 +23,11 @@ During startup \fInotes\fP reads the configuration file \fI$XDG_CONFIG_HOME/note
 \fBdeftype = <extension>
 \fRThis is the default extension file name when the user does not specify one in a new note - name.
 .PP
-.RS 4
+.RS
 .EX
-
 deftype=txt
-
 .EE
 .RE
-.PP
 .TP
 \fBonstart = <command-line>
 \fRCommand to execute at startup of TUI or by option `\f[CR]--onstart\fP'.
@@ -49,44 +46,35 @@ deftype=txt
 \fBrule *action* *pattern* *command*
 \fR\fIRules\fP defines how the program will act of each file type. There are two \fIactions\fP for now,\fIview\fP and \fIedit\fP.
 .PP
-.RS 4
+.RS
 .EX
-
 rule view *.[0-9] man %f
 rule view *.man   man %f
 rule view *.md    bat %f
 rule view *.txt   less %f
 rule view *.pdf   zathura %f
 rule edit *       $EDITOR %f
-
 .EE
 .RE
-.PP
 .TP
 \fBexclude *pattern* [*pattern* ...]
 \fRFile match patterns of files and/or directories to ignore.
 .PP
-.RS 4
+.RS
 .EX
-
 exclude .git trash *.sqlite
-
 .EE
 .RE
-.PP
 .TP
 \fBumenu *label* ; *command*
 \fRSpecifies user-defined menu item to deal with current or tagged files. The command will get the full path files as parameters. Use the 'm' key to invoke the user-defined menu.
 .PP
-.RS 4
+.RS
 .EX
-
 umenu print the files ; echo
 umenu print the contents ; cat
-
 .EE
 .RE
-.PP
 .SH COPYRIGHT
 Copyright © 2020-2021 Nicholas Christopoulos.
 .PP

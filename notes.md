@@ -30,17 +30,10 @@ Running program without arguments, enters in TUI mode (ncurses interface).
 The program was designed to behave as the `man` command.
 
 ```
-> # show note 'sig11'; if not found it will display all titles beginning with
-> # the string
-> notes sig11
-
-> # show all pages whose title begins with 'sig11'
-> notes sig11 -a
-
 > # show page(s) of section (i.e. subdirectory) 'unix' whose title begins with 'sig11'
 > notes -s unix sig11
 
-> # search for a title with patterns
+> # search and show notes for a title with patterns
 > notes '*sig*l1*'
 ```
 
@@ -56,13 +49,10 @@ use `!` option to replace the existing file,
 or set the clobber variable to `false` in the configuration file. (see notesrc(5))
 
 ```
-# Example 1: cat yyy zzz >> xxx
+# example 1: cat yyy zzz > xxx
 > notes -a xxx yyy zzz
 
 # example 2:
-> echo "hello world" | notes -a xxx -
-
-# example 3:
 > cat ~/.notesrc | notes -a! notesrc -
 ```
 
