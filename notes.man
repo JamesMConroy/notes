@@ -7,8 +7,8 @@ notes - manages note files.
 .SH SYNOPSIS
 .SY notes
 .OP \-s section
-.OP \-a[!][e] name\fR\ \fI\fB[\fIfile\fR\ \fI\fB.\fI\fB.\fI\fB.\fI\fB]\fI\fB[\fI\fB-\fI\fB]\fI
-.OP \-a[!]+[e] name\fR\ \fI\fB[\fIfile\fR\ \fI\fB.\fI\fB.\fI\fB.\fI\fB]\fI\fB[\fI\fB-\fI\fB]\fI
+.OP \-a[!][e] name\fR\ \fI\fB[\fIfile\fR\ \fI\fB...][-]\fI
+.OP \-a[!]+[e] name\fR\ \fI\fB[\fIfile\fR\ \fI\fB...][-]\fI
 .OP \-e[a] \fB{\fIname\fB|\fIpattern\fB}\fI
 .OP \-v[a] \fB{\fIname\fB|\fIpattern\fB}\fI
 .OP \-p[a] \fB{\fIname\fB|\fIpattern\fB}\fI
