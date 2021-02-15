@@ -39,6 +39,7 @@ void nc_view(const char *title, const char *body) {
 	if ( title ) nc_wtitle(wout, title, 0);
 	
 	WINDOW	*w = subwin(wout, dy - 4, dx - 6, y + 2, x + 3);
+	keypad(w, TRUE);
 	wlines = dy - 4;
 	wrefresh(wout);
 
@@ -62,10 +63,11 @@ void nc_view(const char *title, const char *body) {
 			mvwprintw(w, y, 0, "%s", text[i]);
 		wrefresh(w);
 		
-		c = getch();
+		c = wgetch(w);
 		switch ( c ) {
 		case 'q': exf ++; break;
-		case '\033': exf ++; break;
+		case '': case '': case '\033':
+			exf ++; break;
 		case '\r': case '\n': exf ++; break;
 		case 'k': case KEY_UP:
 			if ( offset )

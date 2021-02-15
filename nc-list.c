@@ -19,12 +19,18 @@
  * 	Written by Nicholas Christopoulos <nereus@freemail.gr>
  */
 
+#include <stdbool.h>
+#include <ctype.h>
 #include "nc-lib.h"
 
+/*
+ * returns the selected item index or -1
+ */
 int nc_listbox(const char *title, const char **items, int defidx) {
 	int		x, y, dx, dy, c, exf = 0;
 	int		i, lines, wlines, offset;
 	int		maxlen = 0, pos = 0;
+	bool	found;
 	
 	for ( lines = 0; items[lines]; lines ++ )
 		maxlen = MAX(maxlen, strlen(items[lines])); 
@@ -66,13 +72,14 @@ int nc_listbox(const char *title, const char **items, int defidx) {
 		c = wgetch(w);
 		switch ( c ) {
 		case 'q':		pos = -1; exf ++; break;
+		case '': case '':
 		case '\033':	pos = -1; exf ++; break;
 		case '\r': case '\n': exf ++; break;
-		case 'k': case KEY_UP:
+		case KEY_UP:
 			if ( pos )
 				pos --;
 			break;
-		case 'j': case KEY_DOWN:
+		case KEY_DOWN:
 			if ( pos < (lines - 1) )
 				pos ++;
 			break;
@@ -86,8 +93,28 @@ int nc_listbox(const char *title, const char **items, int defidx) {
 			if ( pos > (lines - 1) )
 				pos = lines - 1;
 			break;
-		case 'g': case KEY_HOME:	offset = pos = 0; break;
-		case 'G': case KEY_END:		pos = lines - 1; break;
+		case KEY_HOME:	offset = pos = 0; break;
+		case KEY_END:	pos = lines - 1; break;
+		default:
+			found = false;
+			if ( toupper(c) >= toupper(items[pos][0]) ) { // find next
+				for ( i = pos + 1; i < lines; i ++ ) {
+					if ( toupper(items[i][0]) == toupper(c) ) {
+						pos = i;
+						found = true;
+						break;
+						}
+					}
+				}
+			if ( !found ) { // search from the beginning
+				for ( i = 0; i < lines; i ++ ) {
+					if ( toupper(items[i][0]) == toupper(c) ) {
+						pos = i;
+						found = true;
+						break;
+						}
+					}
+				}
 			}
 		} while ( !exf );
 
