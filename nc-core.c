@@ -21,9 +21,41 @@
 
 #include "nc-lib.h"
 
-#define COLOR_DGRAY		0xEC
-#define COLOR_GRAY		0xF0
-#define is_bold(c) ((1 << 3) & (c))
+typedef struct { int fg, bg, id; } pair_t;
+static pair_t*	pair_table = NULL;
+static int		pair_count = 0;
+
+static int to_vga[] = 
+// 0  1  2  3  4  5  6  7  8   9  10  11  12  13  14  15
+{  0, 4, 2, 6, 1, 5, 3, 7, 8, 12, 10, 14,  9, 13, 11, 15 };
+
+//#define COLOR_DGRAY		0xEC
+//#define COLOR_GRAY		0xF0
+
+// create a new color pair and store it to pair_table
+int nc_createpair(int fg, int bg) {
+	if ( pair_table )
+		pair_table = (pair_t *) realloc(pair_table, sizeof(pair_t) * (pair_count+1));
+	else
+		pair_table = (pair_t *) malloc(sizeof(pair_t) * (pair_count+1));
+	pair_table[pair_count].fg = fg;
+	pair_table[pair_count].bg = bg;
+	pair_table[pair_count].id = 0x10 + pair_count;
+	init_pair(pair_table[pair_count].id, fg, bg);
+	pair_count ++;
+	return pair_table[pair_count - 1].id;
+	}
+int nc_createvgapair(int fg, int bg) { return nc_createpair(to_vga[fg & 0xf], to_vga[bg &0xf]); }
+
+// get the pair no of fg/bg, creates a new one if not found
+int nc_getpairof(int fg, int bg) {
+	if ( pair_table ) {
+		for ( int i = 0; i < pair_count; i ++ )
+			if ( pair_table[i].fg == fg && pair_table[i].bg == bg )
+				return pair_table[i].id;
+		}
+	return nc_createpair(fg, bg);
+	}
 
 // display a title on window 'win'
 // align can be 0: left, 1: right, 2: center
@@ -50,45 +82,8 @@ static int c2dec(char c) {
 	return (c - '0');
 	}
 
-static int ncvgac(int fg, int bg) {
-	int B, bbb, ffff;
-
-	B = 1 << 7;
-	bbb = (7 & bg) << 4;
-	ffff = 7 & fg;
-	return (B | bbb | ffff);
-	}
-
-static short ncvga8(int c) {
-	switch (7 & c)	{
-	case 0: return (COLOR_BLACK);
-	case 1: return (COLOR_BLUE);
-	case 2: return (COLOR_GREEN);
-	case 3: return (COLOR_CYAN);
-	case 4: return (COLOR_RED);
-	case 5: return (COLOR_MAGENTA);
-	case 6: return (COLOR_YELLOW);
-	case 7: return (COLOR_WHITE);
-		}
-	return 0;
-	}
-
 static void nc_clrpairs() {
-	int fg, bg;
-	int colorpair;
-
-	for ( bg = 0; bg < 8; bg ++ ) {
-		for ( fg = 0; fg < 8; fg ++ ) {
-			colorpair = ncvgac(fg, bg);
-			init_pair(colorpair, ncvga8(fg), ncvga8(bg));
-			}
-		}
-	if ( COLORS == 256 ) {
-		init_pair(0x10, -1, COLOR_DGRAY);
-		}
-	else {
-		init_pair(0x10, COLOR_GREEN, COLOR_BLACK);
-		}
+	nc_createpair(COLOR_WHITE, COLOR_BLACK);
 	}
 
 // initialize ncurses
@@ -96,9 +91,10 @@ void nc_init() {
 	initscr();
 	noecho(); nonl(); cbreak();
 	keypad(curscr, TRUE);
+	set_tabsize(4);
 	curs_set(0);
 
-    if ( has_colors() ) {
+	if ( has_colors() ) {
 		start_color();
 		use_default_colors();
 		nc_clrpairs();
@@ -107,26 +103,27 @@ void nc_init() {
 
 // close ncurses
 void nc_close() {
-	endwin(); 
+	endwin();
+	if ( pair_table )
+		free(pair_table);
+	pair_table = NULL;
+	pair_count = 0;
 	}
 
-void nc_color_on(WINDOW *win, int fg, int bg) {	/* set the color pair (colornum) and bold/bright (A_BOLD) */
-	if ( is_bold(fg) ) wattron(win, A_BOLD);
-	if ( is_bold(bg) ) wattron(win, A_BLINK);
-	wattron(win, COLOR_PAIR(ncvgac(fg, bg)));
-	}
+void nc_setvgacolor(WINDOW *win, int fg, int bg)	{ wattron (win, COLOR_PAIR(nc_getpairof(to_vga[fg & 0xF], to_vga[bg & 0xF]))); }
+void nc_unsetvgacolor(WINDOW *win, int fg, int bg)	{ wattroff(win, COLOR_PAIR(nc_getpairof(to_vga[fg & 0xF], to_vga[bg & 0xF]))); }
 
-void nc_color_off(WINDOW *win, int fg, int bg) {	/* unset the color pair (colornum) and bold/bright (A_BOLD) */
-	wattroff(win, COLOR_PAIR(ncvgac(fg, bg)));
-	if ( is_bold(fg) ) wattroff(win, A_BOLD);
-	if ( is_bold(bg) ) wattroff(win, A_BLINK);
-	}
+void nc_setcolor(WINDOW *win, int fg, int bg)	{ wattron (win, COLOR_PAIR(nc_getpairof(fg, bg))); }
+void nc_unsetcolor(WINDOW *win, int fg, int bg)	{ wattroff(win, COLOR_PAIR(nc_getpairof(fg, bg))); }
+
+void nc_setpair  (WINDOW *win, int pair) { wattron  (win, COLOR_PAIR(pair)); }
+void nc_unsetpair(WINDOW *win, int pair) { wattroff (win, COLOR_PAIR(pair)); }
 
 static void nc_hclr(WINDOW *win, int mode, char fg, char bg) {
 	if ( mode ) 
-		nc_color_on(win, c2dec(fg), c2dec(bg)); 
+		nc_setvgacolor(win, c2dec(fg), c2dec(bg)); 
 	else
-		nc_color_off(win, c2dec(fg), c2dec(bg)); 
+		nc_unsetvgacolor(win, c2dec(fg), c2dec(bg)); 
 	}
 static void nc_hpair(WINDOW *win, int mode, char d1, char d0) {
 	if ( mode )
@@ -164,7 +161,7 @@ void nc_mvwprintf(WINDOW *win, int y, int x, const char *fmt, ...) {
 			ccase('r', A_REVERSE)
 			ccase('d', A_DIM)
 			ccase('u', A_UNDERLINE)
-			case 'c':
+			case 'c': // vga color
 				p ++;
 				if ( isxdigit(*p) && isxdigit(p[1]) ) {
 					if ( has_colors() )
@@ -172,7 +169,7 @@ void nc_mvwprintf(WINDOW *win, int y, int x, const char *fmt, ...) {
 					p += 2;
 					}
 				break;
-			case 'C':
+			case 'C': // select pair
 				p ++;
 				if ( isxdigit(*p) && isxdigit(p[1]) ) {
 					if ( has_colors() )

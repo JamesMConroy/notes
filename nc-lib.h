@@ -38,8 +38,17 @@ extern "C" {
 void nc_init ();
 void nc_close();
 
-void nc_color_on (WINDOW *win, int fg, int bg); // note: VGA colors
-void nc_color_off(WINDOW *win, int fg, int bg); // note: VGA colors
+void nc_setcolor  (WINDOW *win, int fg, int bg);
+void nc_unsetcolor(WINDOW *win, int fg, int bg);
+void nc_setvgacolor  (WINDOW *win, int fg, int bg); // note: VGA colors
+void nc_unsetvgacolor(WINDOW *win, int fg, int bg); // note: VGA colors
+#define nc_setvgac(w,a)		nc_setvgacolor(w, (a & 0xF), (a & 0xF0) >> 4)
+#define nc_unsetvgac(w,a)	nc_unsetvgacolor(w, (a & 0xF), (a & 0xF0) >> 4)
+
+int nc_createpair(int fg, int bg);
+int nc_createvgapair(int fg, int bg);
+void nc_setpair   (WINDOW *win, int pair);
+void nc_unsetpair (WINDOW *win, int pair);
 
 void nc_wtitle(WINDOW *win, const char * title, int align);
 

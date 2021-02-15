@@ -560,6 +560,10 @@ static note_t **t_notes;
 static int	t_notes_count;
 static list_t	*tagged;
 static WINDOW	*w_lst, *w_prv, *w_inf;
+typedef enum { ex_nav, ex_search } ex_mode_t;
+static int clr_code = 0x10;
+static int clr_text = 0x10;
+
 
 // short date
 const char *sdate(const time_t *t, char *buf) {
@@ -651,13 +655,22 @@ void ex_print_note(const note_t *note) {
 		if ( (fp = fopen(note->file, "rt")) != NULL ) {
 			while ( fgets(buf, LINE_MAX, fp) ) {
 				if ( strcmp(note->ftype, "md") == 0 ) {
+					int		i, color = clr_text;
+					
+					if ( buf[strlen(buf)-1] == '\n' )
+						buf[strlen(buf)-1] = '\0';
+					
 					switch ( buf[0] ) {
-					case '#': if ( inside_code ) nc_wprintf(w_prv, "\eC10+%s\eC10-", buf); else nc_wprintf(w_prv, "\eb+%s\eb-", buf); break;
-//					case '`': if ( buf[1] == '`' && buf[2] == '`' ) inside_code = !inside_code; nc_wprintf(w_prv, "%s", buf); break;
+					case '#': color = ( inside_code ) ? clr_code : clr_text; break;
 					case '`': if ( buf[1] == '`' && buf[2] == '`' ) inside_code = !inside_code; break;
-					case '\t': nc_wprintf(w_prv, "\eC10+%s\eC10-", buf); break;
-					default: if ( inside_code ) nc_wprintf(w_prv, "\eC10+%s\eC10-", buf); else nc_wprintf(w_prv, "%s", buf);
+					case '\t': color = clr_code; break;
+					default: 
+						color = ( inside_code ) ? clr_code : clr_text;
 						}
+					nc_setpair(w_prv, color);
+					wprintw(w_prv, "%s", buf);
+					for ( i = getcurx(w_prv); i < getmaxx(w_prv) ; i ++ ) wprintw(w_prv, " ");
+					nc_unsetpair(w_prv, color);
 					}
 				else
 					nc_wprintf(w_prv, "%s", buf);
@@ -840,7 +853,7 @@ int ex_tagged_shell(const char *cmd, list_t *tagged) {
 	}
 
 //
-#define ex_presh()		{ def_prog_mode(); endwin(); }
+#define ex_presh()		{ clear(); refresh(); def_prog_mode(); endwin(); }
 #define ex_refresh()	{ keep_status = 1; clear(); ungetch(12); }
 #define fix_offset()	{ \
 	if ( pos < 0 ) pos = 0; \
@@ -849,8 +862,6 @@ int ex_tagged_shell(const char *cmd, list_t *tagged) {
 	if ( offset > pos ) offset = pos; \
 	if ( offset < 0 ) offset = 0; }
 #define INF_PREFIX	10
-
-typedef enum { ex_nav, ex_search } ex_mode_t;
 
 // TUI
 void explorer() {
@@ -872,7 +883,15 @@ void explorer() {
 	tagged = list_create();
 
 	nc_init();
-	TABSIZE=4;
+	if ( COLORS >= 256 ) {
+		clr_code = nc_createpair(COLOR_GREEN, COLOR_BLACK);
+		clr_text = nc_createpair(COLOR_WHITE, COLOR_BLACK);
+		}
+	else {
+		clr_code = nc_createpair(COLOR_GREEN, COLOR_BLACK);
+		clr_text = nc_createpair(COLOR_WHITE, COLOR_BLACK);
+		}
+	
 	raw();
 	ex_build_windows();
 	ex_colorize(ex_help, ex_help_s);

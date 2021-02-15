@@ -46,4 +46,9 @@ install: $(APPNAME) $(APPNAME).1.gz $(APPNAME)rc.5.gz
 uninstall:
 	sudo rm $(INSTALL)/$(APPNAME) $(MANDIR1)/$(APPNAME).1.gz $(MANDIR5)/$(APPNAME)rc.5.gz
 
+nc-colors: nc-colors.c
+	gcc nc-colors.c -o nc-colors -lncurses
+
+nc-getch: nc-getch.c
+	gcc nc-getch.c -o nc-getch -lncurses
 
