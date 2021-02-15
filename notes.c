@@ -564,7 +564,6 @@ typedef enum { ex_nav, ex_search } ex_mode_t;
 static int clr_code = 0x10;
 static int clr_text = 0x10;
 
-
 // short date
 const char *sdate(const time_t *t, char *buf) {
 	struct tm *tmp;
@@ -1357,9 +1356,13 @@ void init() {
 	setevar(home, "HOME", "/tmp");
 	setevar(bdir, "BACKUPDIR", "");
 	
-	sprintf(ndir, "%s/Nextcloud/Notes", home);
-	if ( access(conf, R_OK) != 0 )
-		sprintf(ndir, "%s/.notes", home);
+	if ( getenv("NOTESDIR") )
+		strcpy(ndir, getenv("NOTESDIR"));
+	else {
+		sprintf(ndir, "%s/Nextcloud/Notes", home);
+		if ( access(conf, R_OK) != 0 )
+			sprintf(ndir, "%s/.notes", home);
+		}
 	if ( getenv("XDG_CONFIG_HOME") )
 		sprintf(conf, "%s/notes/notesrc", getenv("XDG_CONFIG_HOME"));
 	else
@@ -1383,8 +1386,14 @@ void init() {
 		}
 
 	// setting up default pager and editor
-	rule_add("view * ${PAGER:-less} %f");
-	rule_add("edit * ${EDITOR:-vi} %f");
+	if ( getenv("NOTESPAGER") )
+		rule_add("view * ${NOTESPAGER:-less} %f");
+	else
+		rule_add("view * ${PAGER:-less} %f");
+	if ( getenv("NOTESEDITOR") )
+		rule_add("edit * ${NOTESEDITOR:-vi} %f");
+	else
+		rule_add("edit * ${EDITOR:-vi} %f");
 	}
 
 //

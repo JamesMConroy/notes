@@ -101,6 +101,29 @@ The program was designed to behave as the ‘\f[CR]man\fP’ command.
 \fB--onexit
 \fRExecutes the command defined by ‘\f[CR]onexit\fP’ in the configuration file and returns its exit code. This option is useful when custom synchronization is needed.
 .PP
+.SH ENVIRONMENT
+The SHELL, EDITOR and PAGER environment variables are used.
+.PP
+.TP
+\fBNOTESDIR
+\fRThe directory of notes. Usually pass this information to sub-shells.
+.PP
+.TP
+\fBNOTESFILES
+\fRThe list of selected files to process. Usually pass this information to sub-shells.
+.PP
+.TP
+\fBNOTESPAGER
+\fRIf it is set then it is the default pager for notes.
+.PP
+.TP
+\fBNOTESEDITOR
+\fRIf it is set then it is the default editor for notes.
+.PP
+.TP
+\fBBACKUPDIR
+\fRIf is set then it is the default backup directory.
+.PP
 .SH COPYRIGHT
 Copyright © 2020-2021 Nicholas Christopoulos.
 .PP

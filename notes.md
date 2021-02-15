@@ -107,6 +107,26 @@ Executes the command defined by `onexit` in the configuration file
 and returns its exit code.
 This option is useful when custom synchronization is needed.
 
+## ENVIRONMENT
+The SHELL, EDITOR and PAGER environment variables are used.
+
+#### NOTESDIR
+The directory of notes.
+Usually pass this information to sub-shells.
+
+#### NOTESFILES
+The list of selected files to process.
+Usually pass this information to sub-shells.
+
+#### NOTESPAGER
+If it is set then it is the default pager for notes.
+
+#### NOTESEDITOR
+If it is set then it is the default editor for notes.
+
+#### BACKUPDIR
+If is set then it is the default backup directory.
+
 ## COPYRIGHT
 Copyright © 2020-2021 Nicholas Christopoulos.
 
