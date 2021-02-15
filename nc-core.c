@@ -21,6 +21,8 @@
 
 #include "nc-lib.h"
 
+#define COLOR_DGRAY		0xEC
+#define COLOR_GRAY		0xF0
 #define is_bold(c) ((1 << 3) & (c))
 
 // display a title on window 'win'
@@ -48,7 +50,7 @@ static int c2dec(char c) {
 	return (c - '0');
 	}
 
-static int nc_colornum(int fg, int bg) {
+static int ncvgac(int fg, int bg) {
 	int B, bbb, ffff;
 
 	B = 1 << 7;
@@ -57,8 +59,8 @@ static int nc_colornum(int fg, int bg) {
 	return (B | bbb | ffff);
 	}
 
-static short nc_ccolor(int fg) {
-	switch (7 & fg)	{           /* RGB */
+static short ncvga8(int c) {
+	switch (7 & c)	{
 	case 0: return (COLOR_BLACK);
 	case 1: return (COLOR_BLUE);
 	case 2: return (COLOR_GREEN);
@@ -75,11 +77,17 @@ static void nc_clrpairs() {
 	int fg, bg;
 	int colorpair;
 
-	for ( bg = 0; bg <= 7; bg ++ ) {
-		for ( fg = 0; fg <= 7; fg ++ ) {
-			colorpair = nc_colornum(fg, bg);
-			init_pair(colorpair, nc_ccolor(fg), nc_ccolor(bg));
+	for ( bg = 0; bg < 8; bg ++ ) {
+		for ( fg = 0; fg < 8; fg ++ ) {
+			colorpair = ncvgac(fg, bg);
+			init_pair(colorpair, ncvga8(fg), ncvga8(bg));
 			}
+		}
+	if ( COLORS == 256 ) {
+		init_pair(0x10, -1, COLOR_DGRAY);
+		}
+	else {
+		init_pair(0x10, COLOR_GREEN, COLOR_BLACK);
 		}
 	}
 
@@ -87,12 +95,12 @@ static void nc_clrpairs() {
 void nc_init() {
 	initscr();
 	noecho(); nonl(); cbreak();
-	keypad(stdscr, TRUE);
 	keypad(curscr, TRUE);
 	curs_set(0);
 
     if ( has_colors() ) {
 		start_color();
+		use_default_colors();
 		nc_clrpairs();
 		}
 	}
@@ -105,17 +113,27 @@ void nc_close() {
 void nc_color_on(WINDOW *win, int fg, int bg) {	/* set the color pair (colornum) and bold/bright (A_BOLD) */
 	if ( is_bold(fg) ) wattron(win, A_BOLD);
 	if ( is_bold(bg) ) wattron(win, A_BLINK);
-	wattron(win, COLOR_PAIR(nc_colornum(fg, bg)));
+	wattron(win, COLOR_PAIR(ncvgac(fg, bg)));
 	}
 
 void nc_color_off(WINDOW *win, int fg, int bg) {	/* unset the color pair (colornum) and bold/bright (A_BOLD) */
-	wattroff(win, COLOR_PAIR(nc_colornum(fg, bg)));
+	wattroff(win, COLOR_PAIR(ncvgac(fg, bg)));
 	if ( is_bold(fg) ) wattroff(win, A_BOLD);
 	if ( is_bold(bg) ) wattroff(win, A_BLINK);
 	}
 
-static void nc_hcon(WINDOW *win, char fg, char bg) { nc_color_on(win, c2dec(fg), c2dec(bg)); }
-static void nc_hcoff(WINDOW *win, char fg, char bg) { nc_color_off(win, c2dec(fg), c2dec(bg)); }
+static void nc_hclr(WINDOW *win, int mode, char fg, char bg) {
+	if ( mode ) 
+		nc_color_on(win, c2dec(fg), c2dec(bg)); 
+	else
+		nc_color_off(win, c2dec(fg), c2dec(bg)); 
+	}
+static void nc_hpair(WINDOW *win, int mode, char d1, char d0) {
+	if ( mode )
+		wattron (win, COLOR_PAIR((c2dec(d1) << 4) | c2dec(d0)));
+	else
+		wattroff(win, COLOR_PAIR((c2dec(d1) << 4) | c2dec(d0)));
+	}
 
 // print with codes/colors
 #define ccase(c,a) case (c): ( p[1] == '+' ) ? wattron(win, (a)) : wattroff(win, (a)); p ++; break;
@@ -149,12 +167,16 @@ void nc_mvwprintf(WINDOW *win, int y, int x, const char *fmt, ...) {
 			case 'c':
 				p ++;
 				if ( isxdigit(*p) && isxdigit(p[1]) ) {
-					if ( has_colors() ) {
-						if ( p[2] == '+' )
-							nc_hcon(win, p[0], p[1]);
-						else
-							nc_hcoff(win, p[0], p[1]);
-						}
+					if ( has_colors() )
+						nc_hclr(win, (p[2] == '+'), p[0], p[1]);
+					p += 2;
+					}
+				break;
+			case 'C':
+				p ++;
+				if ( isxdigit(*p) && isxdigit(p[1]) ) {
+					if ( has_colors() )
+						nc_hpair(win, (p[2] == '+'), p[0], p[1]);
 					p += 2;
 					}
 				break;

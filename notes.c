@@ -652,11 +652,11 @@ void ex_print_note(const note_t *note) {
 			while ( fgets(buf, LINE_MAX, fp) ) {
 				if ( strcmp(note->ftype, "md") == 0 ) {
 					switch ( buf[0] ) {
-					case '#': if ( inside_code ) nc_wprintf(w_prv, "\ec20+%s\ec20-", buf); else nc_wprintf(w_prv, "\eb+%s\eb-", buf); break;
+					case '#': if ( inside_code ) nc_wprintf(w_prv, "\eC10+%s\eC10-", buf); else nc_wprintf(w_prv, "\eb+%s\eb-", buf); break;
 //					case '`': if ( buf[1] == '`' && buf[2] == '`' ) inside_code = !inside_code; nc_wprintf(w_prv, "%s", buf); break;
 					case '`': if ( buf[1] == '`' && buf[2] == '`' ) inside_code = !inside_code; break;
-					case '\t': nc_wprintf(w_prv, "\ec20+%s\ec20-", buf); break;
-					default: if ( inside_code ) nc_wprintf(w_prv, "\ec20+%s\ec20-", buf); else nc_wprintf(w_prv, "%s", buf);
+					case '\t': nc_wprintf(w_prv, "\eC10+%s\eC10-", buf); break;
+					default: if ( inside_code ) nc_wprintf(w_prv, "\eC10+%s\eC10-", buf); else nc_wprintf(w_prv, "%s", buf);
 						}
 					}
 				else
@@ -872,6 +872,7 @@ void explorer() {
 	tagged = list_create();
 
 	nc_init();
+	TABSIZE=4;
 	raw();
 	ex_build_windows();
 	ex_colorize(ex_help, ex_help_s);
