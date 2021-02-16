@@ -90,7 +90,7 @@ static void nc_clrpairs() {
 void nc_init() {
 	initscr();
 	noecho(); nonl(); cbreak();
-	keypad(curscr, TRUE);
+	keypad(stdscr, TRUE);
 	set_tabsize(4);
 	curs_set(0);
 
