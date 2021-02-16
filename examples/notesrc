@@ -7,10 +7,11 @@ notebook=~/Nextcloud/Notes
 exclude .git trash *.sqlite
 
 # rules
-rule view *.pdf nupdf
-rule edit *.txt $EDITOR
-rule edit *.md  nvim
+rule view *.pdf nupdf %f
+rule edit *.txt $EDITOR %f
+rule edit *.md  nvim %f
 
 # user defined menu items
-umenu xdg-open; xdg-open
+umenu xdg-open; xdg-open %f
+umenu copy to clipboard; xclip -i %f
 
