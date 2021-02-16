@@ -1378,6 +1378,10 @@ void init() {
 	vexpand(bdir);
 
 	//
+	if ( access(ndir, X_OK) != 0 )
+		mkdir(ndir, 0700);
+
+	//
 	if ( strlen(sclob) ) {
 		if ( istrue(sclob) )
 			g_globber = true;
