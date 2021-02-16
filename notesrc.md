@@ -46,7 +46,7 @@ Default is true.
 ## STATEMENTS
 The variable `%f` contains the list of relative path names of selected notes or the
 current one. Use `%%` to get a single percent sign. Also, the application pass
-this list to environment variable *$NOTESFILES* and the working directory to
+this list to environment variable *$NOTESFILES* and the notes root directory to
 *$NOTESDIR*. The working directory is always the *$NOTESDIR* and files are
 relative to this.
 
