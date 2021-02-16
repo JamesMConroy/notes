@@ -27,7 +27,8 @@ The program was designed to behave as the ‘\f[CR]man\fP’ command.
 .PP
 .RS
 .EX
-> # show page(s) of section (i.e. subdirectory) 'unix' whose title begins with 'sig11'
+> # show page(s) of section (i.e. subdirectory) 'unix'
+> # whose title begins with 'sig11'
 > notes -s unix sig11
 
 > # search and show notes for a title with patterns
@@ -106,11 +107,11 @@ The SHELL, EDITOR and PAGER environment variables are used.
 .PP
 .TP
 \fBNOTESDIR
-\fRThe directory of notes. Usually used to pass this information to sub-shells.
+\fRThe directory of notes. Usually used to pass this information to shell.
 .PP
 .TP
 \fBNOTESFILES
-\fRThe list of selected files to process. Usually used to pass this information to sub-shells.
+\fRThe list of selected files to process. Usually used to pass this information to shell.
 .PP
 .TP
 \fBNOTESPAGER

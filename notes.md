@@ -30,7 +30,8 @@ Running program without arguments, enters in TUI mode (ncurses interface).
 The program was designed to behave as the `man` command.
 
 ```
-> # show page(s) of section (i.e. subdirectory) 'unix' whose title begins with 'sig11'
+> # show page(s) of section (i.e. subdirectory) 'unix'
+> # whose title begins with 'sig11'
 > notes -s unix sig11
 
 > # search and show notes for a title with patterns
@@ -111,11 +112,11 @@ The SHELL, EDITOR and PAGER environment variables are used.
 
 #### NOTESDIR
 The directory of notes.
-Usually used to pass this information to sub-shells.
+Usually used to pass this information to shell.
 
 #### NOTESFILES
 The list of selected files to process.
-Usually used to pass this information to sub-shells.
+Usually used to pass this information to shell.
 
 #### NOTESPAGER
 If set, the default pager for notes.
