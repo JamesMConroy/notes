@@ -1249,7 +1249,7 @@ void explorer() {
 			if ( t_notes_count ) {
 				char	cmd[LINE_MAX];
 				strcpy(cmd, "");
-				if ( ex_input(cmd, "Enter command (use '%f' for files)") && strlen(cmd) ) {
+				if ( ex_input(cmd, "Enter command (use '%%f' for files)") && strlen(cmd) ) {
 					int tcnt = list_count(tagged);
 					if ( !tcnt )
 						list_addptr(tagged, t_notes[pos]);
