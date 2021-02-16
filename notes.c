@@ -204,6 +204,8 @@ int note_shell(const char *precmd, const char *files) {
 // execute rule for the file 'fn'
 bool rule_exec(int action, const char *fn) {
 	const char *base;
+	size_t root_dir_len = strlen(ndir) + 1;
+
 	list_node_t	*cur = rules->head;
 	if ( (base = strrchr(fn, '/')) == NULL )
 		return false;
@@ -212,7 +214,10 @@ bool rule_exec(int action, const char *fn) {
 		rule_t *rule = (rule_t *) cur->data;
 		if ( rule->code == action && fnmatch(rule->pattern, base, FNM_PATHNAME | FNM_PERIOD | FNM_EXTMATCH) == 0 ) {
 			char file[PATH_MAX];
-			snprintf(file, PATH_MAX, "'%s'", fn);
+			if ( fn[0] == '/' )
+				snprintf(file, PATH_MAX, "'%s'", fn + root_dir_len);
+			else
+				snprintf(file, PATH_MAX, "'%s'", fn);
 			note_shell(rule->command, file);
 			return true;
 			}
@@ -840,13 +845,14 @@ void vstrcat(char *buf, ...) {
 int ex_tagged_shell(const char *cmd, list_t *tagged) {
 	char files[LINE_MAX];
 	const char *p;
+	size_t root_dir_len = strlen(ndir) + 1;
 
 	files[0] = '\0';
 	for ( list_node_t *cur = tagged->head; cur; cur = (list_node_t *) cur->next ) {
 		p = ((note_t *) (cur->data))->file;
 		if ( cur != tagged->head ) // add separator
 			strcat(files, " ");
-		vstrcat(files, "'", p, "'", NULL);
+		vstrcat(files, "'", p + root_dir_len, "'", NULL);
 		}
 	return note_shell(cmd, files);
 	}
@@ -1156,7 +1162,7 @@ void explorer() {
 			break;
 		case KEY_F(11): // show in filemanager
 			{
-			char *fmans[] = { "xdg-open", "nnn", "mc", "thunar", "dolphin", NULL };
+			char *fmans[] = { "xdg-open", "mc", "thunar", "dolphin", NULL };
 			int idx = nc_listbox("File Manager", (const char **) fmans, 0);
 			if ( idx > -1 ) {
 				ex_presh();
@@ -1228,8 +1234,6 @@ void explorer() {
 					if ( !tcnt )
 						list_addptr(tagged, t_notes[pos]);
 					
-					clear();
-					refresh();
 					ex_presh();
 					ex_tagged_shell(opts[idx]->cmd, tagged);
 					printf("\nPress any key to return...\n");
@@ -1249,8 +1253,6 @@ void explorer() {
 					int tcnt = list_count(tagged);
 					if ( !tcnt )
 						list_addptr(tagged, t_notes[pos]);
-					clear();
-					refresh();
 					ex_presh();
 					ex_tagged_shell(cmd, tagged);
 					printf("\nPress any key to return...\n");
@@ -1380,7 +1382,8 @@ void init() {
 	//
 	if ( access(ndir, X_OK) != 0 )
 		mkdir(ndir, 0700);
-
+	chdir(ndir);
+	
 	//
 	if ( strlen(sclob) ) {
 		if ( istrue(sclob) )
@@ -1692,8 +1695,10 @@ int main(int argc, char *argv[]) {
 				cur = (list_node_t *) cur->next;
 				}
 			}
-		else
-			fprintf(stderr, "* no notes found *\n");
+		else {
+			if ( !(opt_flags & OPT_FILES) )
+				fprintf(stderr, "* no notes found *\n");
+			}
 		
 		res = list_destroy(res);
 		}

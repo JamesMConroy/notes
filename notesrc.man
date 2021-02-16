@@ -41,7 +41,7 @@ deftype=txt
 \fRProtection of unintentionally overwrite (same as shell). Default is true.
 .PP
 .SH STATEMENTS
-The variable ‘\f[CR]%f\fP’ contains the list of full path names of selected notes or the current one. Use ‘\f[CR]%%\fP’ to get a single percent sign. Also, the application pass this list to environment variable \fI$NOTESFILES\fP and the working directory to \fI$NOTESDIR\fP.
+The variable ‘\f[CR]%f\fP’ contains the list of relative path names of selected notes or the current one. Use ‘\f[CR]%%\fP’ to get a single percent sign. Also, the application pass this list to environment variable \fI$NOTESFILES\fP and the working directory to \fI$NOTESDIR\fP. The working directory is always the \fI$NOTESDIR\fP and files are relative to this.
 .PP
 .TP
 \fBrule *action* *pattern* *command*
