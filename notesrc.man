@@ -7,7 +7,7 @@ notesrc - NDC's notes configuration file.
 .SH DESCRIPTION
 \fInotes\fP uses a directory and its subdirectories to store the user's notes in files. See ‘\f[CR]notebook\fP’ bellow. The files can be plain text, markdown or anything else that can configured by \fIrule\fP statements in the configuration file.
 .PP
-During startup \fInotes\fP reads the configuration file \fI$XDG_CONFIG_HOME/notes/noterc\fP or \fI~/.config/notes/noterc\fP or \fI~/.notesrc\fP; whichever is encountered first.
+During startup \fInotes\fP reads the configuration file ‘\f[CR]$XDG\_CONFIG\_HOME/notes/noterc\fP’ or ‘\f[CR]~/.config/notes/noterc\fP’ or ‘\f[CR]~/.notesrc\fP’; whichever is encountered first.
 .PP
 .SH VARIABLES
 .PP
@@ -17,7 +17,7 @@ During startup \fInotes\fP reads the configuration file \fI$XDG_CONFIG_HOME/note
 .PP
 .TP
 \fBbackupdir = <directory>
-\fRThe \fInotes\fP stores backup files of the notes before edited or deleted. If \fIbackupdir\fP is omitted then environment variable \fI$BACKUPDIR\fP will be used if it is exists; otherwise no backup will be used.
+\fRThe \fInotes\fP stores backup files of the notes before edited or deleted. If \fIbackupdir\fP is omitted then environment variable \fI$BACKUPDIR\fP will be used if set; otherwise no backup will be used.
 .PP
 .TP
 \fBdeftype = <extension>
@@ -41,6 +41,7 @@ deftype=txt
 \fRProtection of unintentionally overwrite (same as shell). Default is true.
 .PP
 .SH STATEMENTS
+The variable ‘\f[CR]%f\fP’ symbolizes the list of full path names of selected notes or the current one. Use ‘\f[CR]%%\fP’ to get a single percent sign. Also, the application pass this list to environment variable \fI$NOTESFILES\fP and the working directory to \fI$NOTESDIR\fP.
 .PP
 .TP
 \fBrule *action* *pattern* *command*
@@ -71,8 +72,9 @@ exclude .git trash *.sqlite
 .PP
 .RS
 .EX
-umenu print the files ; echo
-umenu print the contents ; cat
+umenu print the files ; echo %f
+umenu print the contents ; cat %f
+umenu copy to clipbard ; xclip -i %f
 .EE
 .RE
 .SH COPYRIGHT

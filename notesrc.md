@@ -9,7 +9,7 @@ The files can be plain text, markdown or anything else that
 can configured by *rule* statements in the configuration file.
 
 During startup *notes* reads the configuration file
-*$XDG\_CONFIG\_HOME/notes/noterc* or *~/.config/notes/noterc* or *~/.notesrc*;
+`$XDG\_CONFIG\_HOME/notes/noterc` or `~/.config/notes/noterc` or `~/.notesrc`;
 whichever is encountered first.
 
 ## VARIABLES
@@ -22,7 +22,7 @@ be used, otherwise the *~/.notes* will be used.
 
 #### backupdir = <directory>
 The *notes* stores backup files of the notes before edited or deleted.
-If *backupdir* is omitted then environment variable *$BACKUPDIR* will be used if it is exists;
+If *backupdir* is omitted then environment variable *$BACKUPDIR* will be used if set;
 otherwise no backup will be used.
 
 #### deftype = <extension>
@@ -44,6 +44,10 @@ Protection of unintentionally overwrite (same as shell).
 Default is true.
 
 ## STATEMENTS
+The variable `%f` contains the list of full path names of selected notes or the
+current one. Use `%%` to get a single percent sign. Also, the application pass
+this list to environment variable *$NOTESFILES* and the working directory to
+*$NOTESDIR*.
 
 #### rule *action* *pattern* *command*
 *Rules* defines how the program will act of each file type.
@@ -71,8 +75,9 @@ The command will get the full path files as parameters.
 Use the 'm' key to invoke the user-defined menu.
 
 ```
-umenu print the files ; echo
-umenu print the contents ; cat
+umenu print the files ; echo %f
+umenu print the contents ; cat %f
+umenu copy to clipbard ; xclip -i %f
 ```
 
 ## COPYRIGHT

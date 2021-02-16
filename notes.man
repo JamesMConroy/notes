@@ -38,7 +38,7 @@ The program was designed to behave as the ‘\f[CR]man\fP’ command.
 .PP
 .TP
 \fB-a[!], --add[!]
-\fRCreates a new note file. If file extension is not specified then it will be used the default (see notesrc). If additional files are specified in the command line, their contents will be inserted into the new note. Use it with ‘\f[CR]-e\fP’ to invoke the editor or ‘\f[CR]-\fP’ to get input from \fIstdin\fP. If the name is already used in this section, then an error will be issued; use ‘\f[CR]!\fP’ option to replace the existing file, or set the clobber variable to ‘\f[CR]false\fP’ in the configuration file.(see notesrc(5))
+\fRCreates a new note file. If file extension is not specified then the default will be used (see notesrc). If additional files are specified in the command line, their contents will be inserted into the new note. Use it with ‘\f[CR]-e\fP’ to invoke the editor or ‘\f[CR]-\fP’ to get input from \fIstdin\fP. If the name is already used in this section, then an error will be issued; use ‘\f[CR]!\fP’ option to replace the existing file, or set the clobber variable to ‘\f[CR]false\fP’ in the configuration file.(see notesrc(5))
 .PP
 .RS
 .EX
@@ -106,23 +106,23 @@ The SHELL, EDITOR and PAGER environment variables are used.
 .PP
 .TP
 \fBNOTESDIR
-\fRThe directory of notes. Usually pass this information to sub-shells.
+\fRThe directory of notes. Usually used to pass this information to sub-shells.
 .PP
 .TP
 \fBNOTESFILES
-\fRThe list of selected files to process. Usually pass this information to sub-shells.
+\fRThe list of selected files to process. Usually used to pass this information to sub-shells.
 .PP
 .TP
 \fBNOTESPAGER
-\fRIf it is set then it is the default pager for notes.
+\fRIf set, the default pager for notes.
 .PP
 .TP
 \fBNOTESEDITOR
-\fRIf it is set then it is the default editor for notes.
+\fRIf set, the default editor for notes.
 .PP
 .TP
 \fBBACKUPDIR
-\fRIf is set then it is the default backup directory.
+\fRIf set, the default backup directory.
 .PP
 .SH COPYRIGHT
 Copyright © 2020-2021 Nicholas Christopoulos.
