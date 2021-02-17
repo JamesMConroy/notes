@@ -66,10 +66,10 @@ void nc_wtitle(WINDOW *win, const char * title, int align) {
 		mvwprintw(win, 0, 2, " %s ", title);
 		break;
 	case 1: // right
-		mvwprintw(win, 0, getmaxx(win) - (strlen(title)+2) - 2, " %s ", title);
+		mvwprintw(win, 0, getmaxx(win) - (u8width(title)+2) - 2, " %s ", title);
 		break;
 	case 2: // center
-		mvwprintw(win, 0, getmaxx(win) / 2 - (strlen(title) + 2) / 2, " %s ", title);
+		mvwprintw(win, 0, getmaxx(win) / 2 - (u8width(title) + 2) / 2, " %s ", title);
 		break;
 		}
 	wattroff(win, A_BOLD);
@@ -80,10 +80,6 @@ static int c2dec(char c) {
 	c = toupper(c);
 	if ( c >= 'A' && c <= 'F' )	return 10 + (c - 'A');
 	return (c - '0');
-	}
-
-static void nc_clrpairs() {
-	nc_createpair(COLOR_WHITE, COLOR_BLACK);
 	}
 
 // initialize ncurses
@@ -97,7 +93,6 @@ void nc_init() {
 	if ( has_colors() ) {
 		start_color();
 		use_default_colors();
-		nc_clrpairs();
 		}
 	}
 
