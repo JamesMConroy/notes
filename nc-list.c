@@ -21,6 +21,7 @@
 
 #include <stdbool.h>
 #include <ctype.h>
+#include <wctype.h>
 #include "nc-lib.h"
 
 /*
@@ -29,18 +30,22 @@
 int nc_listbox(const char *title, const char **items, int defidx) {
 	int		x, y, dx, dy, c, exf = 0;
 	int		i, lines, wlines, offset;
-	int		maxlen = 0, pos = 0;
+	int		maxlen = 0, maxcols = 0, pos = 0;
 	bool	found;
 	
-	for ( lines = 0; items[lines]; lines ++ )
-		maxlen = MAX(maxlen, u8width(items[lines])); 
-	if ( title )
-		maxlen = MAX(maxlen, u8width(title)); 
+	for ( lines = 0; items[lines]; lines ++ ) {
+		maxlen = MAX(maxlen, strlen(items[lines])); 
+		maxcols = MAX(maxcols, u8width(items[lines])); 
+		}
+	if ( title ) {
+		maxlen = MAX(maxlen, strlen(title)); 
+		maxcols = MAX(maxcols, u8width(title));
+		}
 	if ( defidx < 0 || defidx >= lines )
 		defidx = 0;
 	
 	// outer window
-	dx = maxlen + 6;
+	dx = maxcols + 6;
 	dy = MIN(LINES - 4, lines + 2);
 	x = COLS / 2 - dx / 2;
 	y = LINES / 2 - dy / 2;
@@ -64,7 +69,8 @@ int nc_listbox(const char *title, const char **items, int defidx) {
 		werase(w);
 		for ( i = offset, y = 0; i < lines; i ++, y ++ ) {
 			if ( i == pos ) wattron(w, A_REVERSE);
-			mvwprintw(w, y, 0, " %-*s ", maxlen, items[i]);
+			mvwhline(w, y, 0, ' ', getmaxx(w));
+			mvwprintw(w, y, 1, "%s", items[i]);
 			if ( i == pos ) wattroff(w, A_REVERSE);
 			}
 		wrefresh(w);
@@ -95,23 +101,39 @@ int nc_listbox(const char *title, const char **items, int defidx) {
 			break;
 		case KEY_HOME:	offset = pos = 0; break;
 		case KEY_END:	pos = lines - 1; break;
-		default:
-			found = false;
-			if ( toupper(c) >= toupper(items[pos][0]) ) { // find next
-				for ( i = pos + 1; i < lines; i ++ ) {
-					if ( toupper(items[i][0]) == toupper(c) ) {
-						pos = i;
-						found = true;
-						break;
+		default: {
+				found = false;
+				wchar_t	wi, wc;
+				int		clen = u8csize(c);
+				if ( clen > 1 ) {
+					char mbs[5];
+					mbs[0] = c;
+					for ( i = 1; i < clen; i ++ )
+						mbs[i] = wgetch(w);
+					mbs[clen] = '\0';
+					wc = u8towc(mbs);
+					}
+				else
+					wc = (wchar_t) c;
+				wi = u8towc(items[pos]);
+				if ( towupper(wi) >= towupper(wc) ) { // find next
+					for ( i = pos + 1; i < lines; i ++ ) {
+						wi = u8towc(items[i]);
+						if ( towupper(wi) == towupper(wc) ) {
+							pos = i;
+							found = true;
+							break;
+							}
 						}
 					}
-				}
-			if ( !found ) { // search from the beginning
-				for ( i = 0; i < lines; i ++ ) {
-					if ( toupper(items[i][0]) == toupper(c) ) {
-						pos = i;
-						found = true;
-						break;
+				if ( !found ) { // search from the beginning
+					for ( i = 0; i < lines; i ++ ) {
+						wi = u8towc(items[i]);
+						if ( towupper(wi) == towupper(wc) ) {
+							pos = i;
+							found = true;
+							break;
+							}
 						}
 					}
 				}
