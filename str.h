@@ -43,6 +43,12 @@ typedef struct {
 	int	alloc;			// allocation size (used for realloc)
 	} cwords_t;
 
+// utf8
+size_t u8charlen(char c);
+size_t u8strlen(const char *str);
+
+
+//
 char *stradd(char *str, const char *source);
 
 // pascaloids

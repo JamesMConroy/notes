@@ -909,7 +909,8 @@ void explorer() {
 		lines = getmaxy(stdscr) - 2;
 		fix_offset();
 		ex_print_list(offset, pos);
-		ex_print_note(t_notes[pos]);
+		if ( t_notes_count )
+			ex_print_note(t_notes[pos]);
 		
 		if ( mode == ex_search ) {
 			ex_status_line("%s", search);

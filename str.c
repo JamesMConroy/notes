@@ -22,6 +22,30 @@
 #include <assert.h>
 #include "str.h"
 
+#ifndef MIN
+	#define MIN(a,b) ((a<b)?a:b)
+	#define MAX(a,b) ((a>b)?a:b)
+#endif
+
+// utf8 - length of character
+size_t u8charlen(char c) {
+	if ( (c & 0x80) == 0x00) return 1;
+	if ( (c & 0xE0) == 0xC0) return 2;
+	if ( (c & 0xF0) == 0xE0) return 3;
+	if ( (c & 0xF8) == 0xF0) return 4;
+	return 1;
+	}
+
+// utf8 - string length
+size_t u8strlen(const char *str) {
+	const char *p = str;
+	size_t		cnt, len;
+	len = strlen(str);
+	for ( cnt = 0; *p && cnt < len; cnt ++ )
+		p += u8charlen(*p);
+	return cnt;
+	}
+
 // append source to string base
 char *stradd(char *base, const char *source) {
 	char *str = (char *) realloc(base, strlen(base) + strlen(source) + 1);
