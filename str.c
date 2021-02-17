@@ -27,23 +27,39 @@
 	#define MAX(a,b) ((a>b)?a:b)
 #endif
 
-// utf8 - length of character
-size_t u8charlen(char c) {
-	if ( (c & 0x80) == 0x00) return 1;
-	if ( (c & 0xE0) == 0xC0) return 2;
-	if ( (c & 0xF0) == 0xE0) return 3;
-	if ( (c & 0xF8) == 0xF0) return 4;
-	return 1;
+// convert utf8 string to wchar string
+wchar_t *u8towcs(const char *str) {
+	size_t	wlen = mbstowcs(NULL, str, 0);
+	wchar_t *wcs;
+	
+	if ( wlen == (size_t) -1 )
+		wlen = 0;
+	wcs = (wchar_t *) malloc(sizeof(wchar_t) * (wlen + 1));
+	wcs[wlen] = L'\0';
+	if ( wlen ) {
+		if ( mbstowcs(wcs, str, wlen+1) == (size_t) -1 )
+			wcs[0] = L'\0';
+		}
+	return wcs;
 	}
 
-// utf8 - string length
-size_t u8strlen(const char *str) {
-	const char *p = str;
-	size_t		cnt, len;
-	len = strlen(str);
-	for ( cnt = 0; *p && cnt < len; cnt ++ )
-		p += u8charlen(*p);
-	return cnt;
+// convert wchar string to utf8
+char *wcstou8(const wchar_t *wcs) {
+	size_t len = wcstombs(NULL, wcs, 0);
+	if ( len == (size_t) -1 )
+		len = 0;
+	char *str = (char *) malloc(len + 1);
+	str[len] = '\0';
+	if ( wcstombs(str, wcs, len) == (size_t) -1 )
+		str[0] = '\0';
+	return str;
+	}
+
+// convert utf8 char to wchar
+wchar_t u8towc(const char *u8char) {
+	wchar_t	w;
+	mbtowc(&w, u8char, strlen(u8char));
+	return w;
 	}
 
 // append source to string base

@@ -876,7 +876,8 @@ void explorer() {
 	char	buf[LINE_MAX];
 	char	prompt[LINE_MAX];
 	char	status[LINE_MAX];
-	char	search[NAME_MAX];
+	char	search[NAME_MAX], *s;
+	wchar_t	wsearch[NAME_MAX];
 	int		spos, slen, i, maxlen;
 	bool	insert = true;
 	ex_mode_t mode = ex_nav;
@@ -901,8 +902,9 @@ void explorer() {
 	ex_build_windows();
 	ex_colorize(ex_help, ex_help_s);
 	
-	status[0] = '\0';
-	search[0] = '\0';
+	status[0]  = '\0';
+	search[0]  = '\0';
+	wsearch[0] = L'\0';
 	spos = slen = 0;
 	maxlen = getmaxx(w_inf) - INF_PREFIX;
 	do {
@@ -974,6 +976,7 @@ void explorer() {
 		case '': case '':
 			if ( mode == ex_search ) {
 				search[0] = '\0';
+				wsearch[0] = L'\0';
 				spos = 0;
 				mode = ex_nav;
 				curs_set(0);
@@ -1069,6 +1072,7 @@ void explorer() {
 			break;
 		case KEY_F(7): // search
 			search[0] = '\0';
+			wsearch[0] = L'\0';
 			spos = slen = 0;
 			mode = ex_search;
 			curs_set(1);
@@ -1286,6 +1290,19 @@ void explorer() {
 			break;
 		default:
 			if ( mode == ex_search ) {
+				wchar_t wch = (wchar_t) ch;
+				if ( (ch & 0xE0) == 0xC0 ) {
+					char mbs[5];
+					int keylen = 1;
+					mbs[0] = ch;
+					if ( (ch & 0xF8) == 0xF0 ) keylen = 4;
+					else if ( (ch & 0xF0) == 0xE0 ) keylen = 3;
+					else if ( (ch & 0xE0) == 0xC0 ) keylen = 2;
+					for ( i = 1; i < keylen; i ++ )
+						mbs[i] = wgetch(w_inf);
+					mbs[keylen] = '\0';
+					mbtowc(&wch, mbs, keylen);
+					}
 				switch ( ch ) {
 				case KEY_LEFT:	if ( spos ) spos --; break;
 				case KEY_RIGHT:	if ( search[spos] ) spos ++; break;
@@ -1294,15 +1311,15 @@ void explorer() {
 				case KEY_BACKSPACE: case 8: case 127:
 					if ( spos ) {
 						spos --; slen --;
-						for ( i = spos; search[i]; i ++ )
-							search[i] = search[i+1];
-						search[slen] = '\0';
+						for ( i = spos; wsearch[i]; i ++ )
+							wsearch[i] = wsearch[i+1];
+						wsearch[slen] = '\0';
 						}
 					break;
 				case KEY_DC:
-					if ( search[spos] ) {
-						for ( i = spos; search[i]; i ++ )
-							search[i] = search[i+1];
+					if ( wsearch[spos] ) {
+						for ( i = spos; wsearch[i]; i ++ )
+							wsearch[i] = wsearch[i+1];
 						slen --;
 						}
 					break;
@@ -1314,20 +1331,23 @@ void explorer() {
 					if ( slen < maxlen ) {
 						if ( insert ) {
 							for ( i = slen; i >= spos; i -- )
-								search[i+1] = search[i];
-							search[spos] = ch;
-							search[++ slen] = '\0';
+								wsearch[i+1] = wsearch[i];
+							wsearch[spos] = wch;
+							wsearch[++ slen] = '\0';
 							}
 						else {
-							search[spos] = ch;
+							wsearch[spos] = wch;
 							if ( spos == slen )
-								search[++ slen] = '\0';
+								wsearch[++ slen] = '\0';
 							}
 						spos ++;
 						}
 					}
-
+				
 				// rebuild everything
+				s = wcstou8(wsearch);
+				strcpy(search, s);
+				free(s);
 				sprintf(current_filter, "*%s*", search);
 				ex_rebuild();
 				}

@@ -44,9 +44,9 @@ typedef struct {
 	} cwords_t;
 
 // utf8
-size_t u8charlen(char c);
-size_t u8strlen(const char *str);
-
+wchar_t *u8towcs(const char *u8str);
+char *wcstou8(const wchar_t *wcs);
+wchar_t u8towc(const char *u8char);
 
 //
 char *stradd(char *str, const char *source);
