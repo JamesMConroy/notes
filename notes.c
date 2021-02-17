@@ -711,7 +711,7 @@ ENTER  ... Display the current note at $PAGER.\n\
 v, F3  ... View. Display the current or the tagged notes at $PAGER.\n\
 e, F4  ... Edit. Edit the current or the tagged notes with the $EDITOR.\n\
 r  F6  ... Rename. Renames the current note.\n\
-d, DEL ... Delete. Deletes the curret or the tagged notes.\n\
+d, DEL ... Delete. Deletes the current or the tagged notes.\n\
 n, ^N  ... New. Invokes the $EDITOR with the new file; you have to save it.\n\
 a      ... Add. Creates a new empty note.\n\
 s      ... Select Section.\n\
@@ -726,7 +726,7 @@ F11    ... Open notes directory in file manager.\n\
 F5     ... Rebuild & redraw list.\n\
 \n\
 Notes:\n\
-[1] The application uses the same pattern as the shell with KSH extentions.\n\
+[1] The application uses the same pattern as the shell with KSH extensions.\n\
     (see `man fnmatch`)\n\
 ";
 
