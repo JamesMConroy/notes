@@ -10,7 +10,7 @@ bool nc_mvweditstr(WINDOW *w, int y, int x, char *u8str, int maxlen) {
 	char	*s;
 
 	wcs = u8towcs(u8str);
-	str = (wchar_t *) malloc(sizeof(wchar_t) * LINE_MAX);
+	str = (wchar_t *) malloc(sizeof(wchar_t) * (maxlen + 1));
 	wcscpy(str, wcs);
 	free(wcs);
 	len = wcslen(str);
@@ -27,17 +27,14 @@ bool nc_mvweditstr(WINDOW *w, int y, int x, char *u8str, int maxlen) {
 		
 		// get key
 		key = mvwgetch(w, y, x + pos);
-		if ( key > 0x7f && key < 0xff && (key & 0xE0) == 0xC0 ) {
+		if ( u8ischar(key) ) {
 			char mbs[5];
-			int keylen = 1;
+			int keylen = u8csize(key);
 			mbs[0] = key;
-			if ( (key & 0xF8) == 0xF0 ) keylen = 4;
-			else if ( (key & 0xF0) == 0xE0 ) keylen = 3;
-			else if ( (key & 0xE0) == 0xC0 ) keylen = 2;
 			for ( i = 1; i < keylen; i ++ )
 				mbs[i] = wgetch(w);
 			mbs[keylen] = '\0';
-			mbtowc(&wch, mbs, keylen);
+			wch = u8towc(mbs);
 			}
 		else
 			wch = (wchar_t) key;
@@ -78,8 +75,7 @@ bool nc_mvweditstr(WINDOW *w, int y, int x, char *u8str, int maxlen) {
 			mvwprintw(w, y, x, "%ls", str);
 			mvwhline (w, y, x + len, ' ', maxlen - len);
 			curs_set(ocurs);
-			s = wcstou8(str); strcpy(u8str, s); free(s);
-			free(str);
+			u8cpytostr(u8str, str);
 			return true;
 		default:
 			if ( len < maxlen ) {

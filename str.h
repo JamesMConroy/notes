@@ -26,6 +26,7 @@
 extern "C" {
 #endif
 
+#include <wchar.h>
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
@@ -47,6 +48,12 @@ typedef struct {
 wchar_t *u8towcs(const char *u8str);
 char *wcstou8(const wchar_t *wcs);
 wchar_t u8towc(const char *u8char);
+void	u8cpytostr(char *u8buf, const wchar_t *wcs);
+void	u8cpytowcs(wchar_t *wcs, const char *u8str);
+size_t	u8strlen(const char *str);
+size_t	u8width(const char *str);
+int		u8csize(unsigned char c);
+bool	u8ischar(int c);
 
 //
 char *stradd(char *str, const char *source);

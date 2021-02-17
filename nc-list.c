@@ -33,9 +33,9 @@ int nc_listbox(const char *title, const char **items, int defidx) {
 	bool	found;
 	
 	for ( lines = 0; items[lines]; lines ++ )
-		maxlen = MAX(maxlen, strlen(items[lines])); 
+		maxlen = MAX(maxlen, u8width(items[lines])); 
 	if ( title )
-		maxlen = MAX(maxlen, strlen(title)); 
+		maxlen = MAX(maxlen, u8width(title)); 
 	if ( defidx < 0 || defidx >= lines )
 		defidx = 0;
 	

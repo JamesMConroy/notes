@@ -625,7 +625,7 @@ void ex_print_list(int offset, int pos) {
 			if ( pos == i ) wattron(w_lst, A_REVERSE);
 			mvwhline(w_lst, y, 0, ' ', getmaxx(w_lst));
 			if ( strlen(t_notes[i]->section) ) {
-				int l = strlen(t_notes[i]->section);
+				int l = u8width(t_notes[i]->section);
 				wattron(w_lst, A_DIM);
 				mvwprintw(w_lst, y, getmaxx(w_lst)-l, "%s", t_notes[i]->section);
 				wattroff(w_lst, A_DIM);
@@ -876,7 +876,7 @@ void explorer() {
 	char	buf[LINE_MAX];
 	char	prompt[LINE_MAX];
 	char	status[LINE_MAX];
-	char	search[NAME_MAX], *s;
+	char	search[NAME_MAX];
 	wchar_t	wsearch[NAME_MAX];
 	int		spos, slen, i, maxlen;
 	bool	insert = true;
@@ -1272,7 +1272,7 @@ void explorer() {
 		case '':
 			strcpy(buf, "");
 			if ( ex_input(buf, "Enter new name ([section/]new-name[.extension])") && strlen(buf) ) {
-				note_t *note = make_note(buf, current_section, (ch == 'a') ? 1 : 0);
+				note_t *note = make_note(buf, current_section, (ch == '\001') ? 1 : 0);
 				if ( note ) {
 					sprintf(status, "'%s' created", note->name);
 					ex_rebuild();
@@ -1291,17 +1291,14 @@ void explorer() {
 		default:
 			if ( mode == ex_search ) {
 				wchar_t wch = (wchar_t) ch;
-				if ( (ch & 0xE0) == 0xC0 ) {
+				if ( u8ischar(ch) ) {
 					char mbs[5];
-					int keylen = 1;
+					int keylen = u8csize(ch);
 					mbs[0] = ch;
-					if ( (ch & 0xF8) == 0xF0 ) keylen = 4;
-					else if ( (ch & 0xF0) == 0xE0 ) keylen = 3;
-					else if ( (ch & 0xE0) == 0xC0 ) keylen = 2;
 					for ( i = 1; i < keylen; i ++ )
 						mbs[i] = wgetch(w_inf);
 					mbs[keylen] = '\0';
-					mbtowc(&wch, mbs, keylen);
+					wch = u8towc(mbs);
 					}
 				switch ( ch ) {
 				case KEY_LEFT:	if ( spos ) spos --; break;
@@ -1345,9 +1342,7 @@ void explorer() {
 					}
 				
 				// rebuild everything
-				s = wcstou8(wsearch);
-				strcpy(search, s);
-				free(s);
+				u8cpytostr(search, wsearch);
 				sprintf(current_filter, "*%s*", search);
 				ex_rebuild();
 				}

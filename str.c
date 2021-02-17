@@ -20,6 +20,7 @@
  */
 
 #include <assert.h>
+#define _XOPEN_SOURCE
 #include "str.h"
 
 #ifndef MIN
@@ -55,11 +56,75 @@ char *wcstou8(const wchar_t *wcs) {
 	return str;
 	}
 
+// copy wcs to mbs
+void u8cpytostr(char *u8buf, const wchar_t *wcs) {
+	char *s = wcstou8(wcs);
+	strcpy(u8buf, s);
+	free(s);
+	}
+
+// copy mbs to wcs
+void u8cpytowcs(wchar_t *wcs, const char *u8str) {
+	wchar_t *s = u8towcs(u8str);
+	wcscpy(wcs, s);
+	free(s);
+	}
+
+//
+bool u8ischar(int c) {
+	if ( c > 0x1f && c <= 0xff && (c & 0xE0) == 0xC0 )
+		return true;
+	return false;
+	}
+
+// size in bytes of utf8 character 'c'
+int u8csize(unsigned char c) {
+	int len = 1;
+	
+	if ( (c & 0xE0) == 0xC0 ) { // valid UTF-8
+		if ( (c & 0xF8) == 0xF0 ) len = 4;
+		else if ( (c & 0xF0) == 0xE0 ) len = 3;
+		else if ( (c & 0xE0) == 0xC0 ) len = 2;
+		}
+	return len;
+	}
+
 // convert utf8 char to wchar
-wchar_t u8towc(const char *u8char) {
-	wchar_t	w;
-	mbtowc(&w, u8char, strlen(u8char));
-	return w;
+//wchar_t u8towc(const char *u8char) {
+//	wchar_t	w;
+//	mbtowc(&w, u8char, strlen(u8char));
+//	return w;
+//	}
+
+// convert u8character to whchar_t
+wchar_t	u8towc(const char *str) {
+	wchar_t wch = L'\0';
+	int len = u8csize(str[0]);
+	if ( len )
+		mbtowc(&wch, str, len + 1);
+	return wch;
+	}
+
+// the length of string in characters (similar to u8width)
+size_t	u8strlen(const char *str) {
+	const char	*p = str;
+	size_t		cnt = 0, len;
+	while ( *p ) {
+		len = u8csize(*p);
+		p += len;
+		cnt ++;
+		}
+	return cnt;
+	}
+
+// width in screen-columns of wcs
+size_t u8width(const char *str) {
+	// ? why wcswidth isnt defined?
+	//wchar_t *s = u8towcs(str);
+	//int	n = wcswidth(s, wcslen(s));
+	//free(s);
+	//return n;
+	return u8strlen(str);
 	}
 
 // append source to string base
