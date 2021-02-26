@@ -707,28 +707,29 @@ static char ex_help[LINE_MAX];
 static char *ex_help_long = "\
 ?, F1  ... Help. This window.\n\
 q, ^Q  ... Quit. Terminates the program.\n\
-ENTER  ... Display the current note at $PAGER.\n\
-v, F3  ... View. Display the current or the tagged notes at $PAGER.\n\
-e, F4  ... Edit. Edit the current or the tagged notes with the $EDITOR.\n\
+ENTER  ... Display the current note with $PAGER.\n\
+v, F3  ... View. Display the current or the tagged notes[1] with $PAGER.\n\
+e, F4  ... Edit. Edit the current or the tagged notes[1] with the $EDITOR.\n\
 r  F6  ... Rename. Renames the current note.\n\
-d, DEL ... Delete. Deletes the current or the tagged notes.\n\
-n, ^N  ... New. Invokes the $EDITOR with the new file; you have to save it.\n\
+d, DEL ... Delete. Deletes the current or the tagged notes[1].\n\
+n, ^N  ... New. Invokes the $EDITOR with a new file; you will have to save it.\n\
 a      ... Add. Creates a new empty note.\n\
 s      ... Select Section.\n\
-c      ... Change section. Changes the section of the current or the tagged notes.\n\
+c      ... Change section. Changes the section of the current or the tagged notes[1].\n\
 t, INS ... Tag/Untag current note.\n\
 u, F9  ... Untag all.\n\
-f      ... Set Filter[1].\n\
-/, F7  ... Search[1].\n\
+/, F7  ... Search[2].\n\
 m, F2  ... Menu. Invoke user-defined menu.\n\
-x, F10 ... Execute something with current/tagged notes.\n\
-F11    ... Open notes directory in file manager.\n\
-F5     ... Rebuild & redraw list.\n\
+!, x, F10  Execute something with current/tagged notes[1].\n\
+F11    ... Open the notes directory with the file manager.\n\
+F5     ... Rebuild & redraw the list.\n\
 \n\
 Notes:\n\
-[1] The application uses the same pattern as the shell with KSH extensions.\n\
+[1] The tagged notes if there are any, otherwise the current note.\n\
+[2] The application uses the same pattern as the shell with KSH extensions.\n\
     (see `man fnmatch`)\n\
 ";
+//f      ... Set Filter[1].\n
 
 // build the table with notes
 bool ex_build() {
@@ -954,8 +955,9 @@ void explorer() {
 			// F5 = refresh
 			case 'r': ch = KEY_F(6); break;	// rename
 			case '/': ch = KEY_F(7); break;	// search
-			case 'f': ch = KEY_F(8); break;	// filter
+//			case 'f': ch = KEY_F(8); break;	// filter
 			case 'u': ch = KEY_F(9); break;	// untag all
+			case '!': ch = KEY_F(10); break; // execute command
 			case 'x': ch = KEY_F(10); break; // execute command
 			case 's': ch = KEY_F(25); break; // select section
 			case 'c': ch = KEY_F(26); break; // change section
@@ -1061,15 +1063,15 @@ void explorer() {
 				ex_refresh();
 				}
 			break;
-		case KEY_F(8): // filter
-			strcpy(buf, current_filter);
-			if ( ex_input(buf, "Set filter (current filter: '%s')", current_filter) ) {
-				strcpy(current_filter, buf);
-				ex_rebuild();
-				offset = pos = 0;
-				}
-			ex_refresh();
-			break;
+//		case KEY_F(8): // filter
+//			strcpy(buf, current_filter);
+//			if ( ex_input(buf, "Set filter (current filter: '%s')", current_filter) ) {
+//				strcpy(current_filter, buf);
+//				ex_rebuild();
+//				offset = pos = 0;
+//				}
+//			ex_refresh();
+//			break;
 		case KEY_F(7): // search
 			search[0] = '\0';
 			wsearch[0] = L'\0';
@@ -1438,8 +1440,8 @@ static const char *usage = "\
 Usage: notes [mode] [options] [-s section] {note|pattern} [-|file(s)]\n\
 \n\
 Modes:\n\
-    -a, --add      add a new note. use `!' to replace it if exist. \n\
-    -a+, --append  append to note. use `!' to create it if does not exist.\n\
+    -a, --add      add a new note; use `!' to replace an existing note. \n\
+    -a+, --append  append to a note; use `!' to create one if it does not exist.\n\
     -l, --list     list notes ('*' displays all)\n\
     -f, --files    same as list but displays only full pathnames (for scripts)\n\
     -v, --view     sends the note[s] to the $PAGER (see --all)\n\
@@ -1450,18 +1452,18 @@ Modes:\n\
 \n\
 Options:\n\
     -s, --section  define section\n\
-    -a, --all      displays all files that found, use it with -p, -v or -e\n\
+    -a, --all      displays all matching files; use it with -p, -v or -e\n\
     -              input from stdin\n\
 \n\
 Utilities:\n\
-    WIP --cleanup      removes empty sections\n\
-    WIP --complete     list notes for scripts (completion code)\n\
-    --onstart      executes the 'onstart' command and returns its exit code.\n\
-    --onexit       executes the 'onexit' command and returns its exit code.\n\
+    --onstart      executes the 'onstart' command and returns its exit code\n\
+    --onexit       executes the 'onexit' command and returns its exit code\n\
 \n\
     -h, --help     this screen\n\
     --version      version and program information\n\
 ";
+//    WIP --cleanup      removes empty sections\n
+//    WIP --complete     list notes for scripts (completion code)\n
 
 static const char *verss = "\
 notes version "APP_VER"\n\
