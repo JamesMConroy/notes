@@ -719,7 +719,7 @@ c      ... Change section. Changes the section of the current or the tagged note
 t, INS ... Tag/Untag current note.\n\
 u, F9  ... Untag all.\n\
 /, F7  ... Search[2].\n\
-m, F2  ... Menu. Invoke user-defined menu.\n\
+m, F2  ... Menu. Open the user-defined menu.\n\
 !, x, F10  Execute something with current/tagged notes[1].\n\
 F11    ... Open the notes directory with the file manager.\n\
 F5     ... Rebuild & redraw the list.\n\

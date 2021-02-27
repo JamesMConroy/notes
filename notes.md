@@ -19,10 +19,12 @@ SYNTAX:
 	[pattern]
 
 ## DESCRIPTION
-Your notes (files) are stored in a directory (and its subdirectories).
-This directory can be the **Nextcloud®**'s (`~/Nextcloud/Notes`).
-The files can be plain text, markdown or anything else that
-can configured by the *rule* command in the configuration file (see notesrc(5)).
+The notes-files are stored in a user-defined directory with optional subdirectories.
+The subdirectories in the application are named *sections*.
+Normally this directory is `~/.notes` or `~/Nextcloud/Notes` if there is nextcloud.
+It can be specified in the configuration file (see notesrc(5)).
+The files can be plain text, markdown or anything else that can configured
+by the *rule* command in the configuration file (see notesrc(5)).
 If the *note* is `-` then it reads from *stdin*.
 
 Running program without arguments, enters in TUI mode (ncurses interface).

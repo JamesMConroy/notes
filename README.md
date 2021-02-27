@@ -9,15 +9,15 @@ format but I never did. I want to reorganize them with a file manager like `mc`.
 * Notes can support any file type, but it is designed for plain-text (txt,md,troff,...).
 * CLI interface. It is designed to behave as `man`.
 * NCurses interface (run it without arguments).
-* Nextcloud Notes compatible. I use nextcloud to synchronize my notes and use them in Android. So it designed to work well with Nextcloud.
-* It can synchronized with almost any known utility (rsync, git, rclone, etc)
+* Nextcloud Notes compatible. I use nextcloud to synchronize my notes and use them in Android. So _notes_ is designed to work well with Nextcloud.
+* It can be synchronized with almost any known utility (rsync, git, rclone, etc)
 	(see notesrc(5), onstart/onexit)
 * Viewer & Editor can be specified per file type.
 * User-defined popup menu (see `man notesrc`).
 
 The notes-files are stored in a user-defined directory with optional subdirectories.
-The subdirectories in the application are named **sections**. Normally this
-directory is the `~/Nextcloud/Notes`, or `~/.notes` if there is no nextcloud.
+The subdirectories in the application are named **sections**.
+Normally this directory is `~/.notes` or `~/Nextcloud/Notes` if there is nextcloud.
 It can be specified in the configuration file (see `man notesrc`).
 The viewer (pager) and the editor can be configured by file type in the configuration file.
 There is a list to exclude files or directories from the notes-list (for example `.git` directrory).
