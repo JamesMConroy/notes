@@ -19,7 +19,7 @@ notes - manages note files.
 .RI [pattern]
 .YS
 .SH DESCRIPTION
-Your notes (files) are stored in a directory (and its subdirectories). This directory can be the \fBNextcloud®\fP's (‘\f[CR]~/Nextcloud/Notes\fP’). The files can be plain text, markdown or anything else that can configured by the \fIrule\fP command in the configuration file (see notesrc(5)). If the \fInote\fP is ‘\f[CR]-\fP’ then it reads from \fIstdin\fP.
+The notes-files are stored in a user-defined directory with optional subdirectories. The subdirectories in the application are named \fIsections\fP. Normally this directory is ‘\f[CR]~/.notes\fP’ or ‘\f[CR]~/Nextcloud/Notes\fP’ if there is nextcloud. It can be specified in the configuration file (see notesrc(5)). The files can be plain text, markdown or anything else that can configured by the \fIrule\fP command in the configuration file (see notesrc(5)). If the \fInote\fP is ‘\f[CR]-\fP’ then it reads from \fIstdin\fP.
 .PP
 Running program without arguments, enters in TUI mode (ncurses interface).
 .PP
