@@ -290,34 +290,6 @@ void parse(int line, const char *source) {
 		}
 	}
 
-// copy file
-bool copy_file(const char *src, const char *trg) {
-	FILE	*inp, *outp;
-	char	buf[LINE_MAX];
-	size_t	bytes;
-	
-	if ( (inp = fopen(src, "r")) == NULL ) {
-		fprintf(stderr, "%s: errno %d: %s\n", src, errno, strerror(errno));
-		return false;
-		}
-	if ( (outp = fopen(trg, "w")) == NULL ) {
-		fprintf(stderr, "%s: errno %d: %s\n", trg, errno, strerror(errno));
-		fclose(inp);
-		return false;
-		}
-	
-	// copy
-	while ( !feof(inp) ) {
-		if ( (bytes = fread(buf, 1, sizeof(buf), inp)) > 0 )
-			fwrite(buf, 1, bytes, outp);
-		}
-	
-	// close
-	fclose(outp);
-	fclose(inp);
-	return true;
-	}
-
 // read configuration file
 void read_conf(const char *rc) {
 	int line = 0;
@@ -345,6 +317,34 @@ typedef struct {
 	struct stat st;				// just useless data for info
 	} note_t;
 list_t	*notes, *sections;
+
+// copy file
+bool copy_file(const char *src, const char *trg) {
+	FILE	*inp, *outp;
+	char	buf[LINE_MAX];
+	size_t	bytes;
+	
+	if ( (inp = fopen(src, "r")) == NULL ) {
+		fprintf(stderr, "%s: errno %d: %s\n", src, errno, strerror(errno));
+		return false;
+		}
+	if ( (outp = fopen(trg, "w")) == NULL ) {
+		fprintf(stderr, "%s: errno %d: %s\n", trg, errno, strerror(errno));
+		fclose(inp);
+		return false;
+		}
+	
+	// copy
+	while ( !feof(inp) ) {
+		if ( (bytes = fread(buf, 1, sizeof(buf), inp)) > 0 )
+			fwrite(buf, 1, bytes, outp);
+		}
+	
+	// close
+	fclose(outp);
+	fclose(inp);
+	return true;
+	}
 
 // backup note-file
 bool note_backup(const note_t *note) {
