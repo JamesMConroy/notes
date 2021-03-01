@@ -84,9 +84,20 @@ static int c2dec(char c) {
 
 // initialize ncurses
 void nc_init() {
+	char buf[16];
+	int	 i;
+
 	initscr();
 	noecho(); nonl(); cbreak();
 	keypad(stdscr, TRUE);
+
+	// setup ALT KEYS
+	for ( i = 1; i < 128; i ++ ) {
+		sprintf(buf, "\033%c", i);
+		define_key(buf, KEY_ALT_BIT | i);
+		}
+
+	//
 	set_tabsize(4);
 	curs_set(0);
 
