@@ -43,7 +43,7 @@ extern "C" {
 #define KEY_CTRL(n)		(toupper(n)-'@')
 #define KEY_ALT(n)		(KEY_ALT_BIT | n)
 #define KEY_USR(n)		(KEY_USR_BIT | n)
-#define KEY_PRG(n)		(KEY_USR_BIT | n)
+#define KEY_PRG(n)		(KEY_PRG_BIT | n)
 
 #define KEY_PGUP	KEY_PPAGE
 #define KEY_PGDN	KEY_NPAGE

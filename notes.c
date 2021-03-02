@@ -150,7 +150,13 @@ static keyfunc_t keyfunc[] = {
 { "delete",		KEY_PRG('d') },
 { "help",		KEY_PRG(KEY_HELP) },
 { "tag",		KEY_PRG(KEY_MARK) },
+{ "shell",		KEY_PRG('!') },
+{ "execute",		KEY_PRG('!') },
 { "untag-all",	KEY_PRG('u') },
+{ "change-section",		KEY_PRG('c') },
+{ "select-section",		KEY_PRG('s') },
+{ "umenu",		KEY_PRG('m') },
+{ "user-menu",		KEY_PRG('m') },
 { "search",		KEY_PRG(KEY_FIND) },
 { NULL, 0 } };
 
@@ -191,17 +197,20 @@ void set_default_keymap() {
 	setkey(KEY_HOME, 1, '^', 0);
 	setkey(KEY_END, '', '$', 0);
 
-	setkey('d', KEY_DC, 0);
-	setkey(KEY_MARK, 't', KEY_IC, 0);
-	setkey(KEY_HELP, '?', KEY_F(1), 0);
-	setkey('e', 0);
-	setkey('v', KEY_ENTER, 0);
-	setkey('n', 0);
-	setkey('a', 0);
-	setkey('u', 0);
-	setkey(KEY_FIND, '/', 0);
-	setkey('c', 0);
-	setkey('f', 0);
+	setkey('?', KEY_F(1), 0); // help
+	setkey('d', KEY_DC, 0);	// delete
+	setkey('v', KEY_ENTER, 0); // view
+	setkey('e', 0); // edit
+	setkey('n', 0);	// new
+	setkey('a', 0);	// add
+	setkey('t', KEY_IC, 0);	// tag/untag
+	setkey('u', 0);	// untag all
+	setkey('/', KEY_F(7), 0); // search
+	setkey('c', 0); // change section (move-to)
+	setkey('s', 0);	// select section (filter)
+	setkey('m', KEY_F(2), 0);	// user-defined menu
+	setkey('!', KEY_F(10), 0);	// execute
+	setkey('f', 0);	// set filter test
 	}
 
 // returns the last defined KEY_PRG code of the 'key'
@@ -217,6 +226,65 @@ int	getkprg(int key) {
 		cur = (list_node_t *) cur->next;
 		}
 	return cid;
+	}
+
+// returns the key-code from a string
+int getkcode(const char *name) {
+	const char *p = name;
+	int   flags = 0, c = 0;
+	char	str[4];
+
+	if ( *p == '^' ) {
+		flags |= 0x2;
+		p ++;
+		}
+	else {
+		while ( p[1] == '-' ) {
+			switch ( toupper(*p) ) {
+			case 'S': flags |= 0x1; break;
+			case 'C': flags |= 0x2; break;
+			case 'A': case 'M': flags |= 0x4; break;
+			default: // error
+				fprintf(stderr, "unknown key combination '%s'\n", name);
+				return 0;
+				}
+			p += 2;
+			}
+		}
+	
+	if ( toupper(*p) == 'F' && isdigit(*(p+1)) ) {
+		str[0] = p[1];
+		str[2] = ( isdigit(p[2]) ) ? p[2] : '\0';
+		str[3] = '\0';
+		// flags does not works with ncurses... man -s 3 curs_getch
+		return KEY_F(atoi(str));
+		}
+	
+	if ( strcasecmp(p, "enter") == 0 )	return KEY_ENTER;
+	else if ( strcasecmp(p, "esc") == 0 )	return 27;
+	else if ( strcasecmp(p, "tab") == 0 )	return 9;
+	else if ( strcasecmp(p, "home") == 0 )	return (flags & 0x1) ? KEY_SHOME : KEY_HOME;
+	else if ( strcasecmp(p, "end") == 0 )	return (flags & 0x1) ? KEY_SEND : KEY_END;
+	else if ( strcasecmp(p, "pgup") == 0 )	return KEY_PGUP;
+	else if ( strcasecmp(p, "pageup") == 0 )	return KEY_PGUP;
+	else if ( strcasecmp(p, "pgdn") == 0 )	return KEY_PGDN;
+	else if ( strcasecmp(p, "pagedn") == 0 )	return KEY_PGDN;
+	else if ( strcasecmp(p, "pagedown") == 0 )	return KEY_PGDN;
+	else if ( strcasecmp(p, "up") == 0 )		return KEY_UP;
+	else if ( strcasecmp(p, "down") == 0 )	return KEY_DOWN;
+	else if ( strcasecmp(p, "left") == 0 )	return (flags & 0x1) ? KEY_SLEFT : KEY_LEFT;
+	else if ( strcasecmp(p, "right") == 0 )	return (flags & 0x1) ? KEY_SRIGHT : KEY_RIGHT;
+	else if ( strcasecmp(p, "insert") == 0 )	return (flags & 0x1) ? KEY_SIC : KEY_IC;
+	else if ( strcasecmp(p, "delete") == 0 )	return (flags & 0x1) ? KEY_SDC : KEY_DC;
+	else if ( strcasecmp(p, "ins") == 0 )	return (flags & 0x1) ? KEY_SIC : KEY_IC;
+	else if ( strcasecmp(p, "del") == 0 )	return (flags & 0x1) ? KEY_SDC : KEY_DC;
+	else {
+		c = ( flags & 0x3 ) ? toupper(*p) : *p;
+		if ( flags & 0x2 )	c = (c >= '@') ? c - '@' : c;
+		if ( flags & 0x4 )	c |= KEY_ALT_BIT;
+		return c;
+		}
+	fprintf(stderr, "unknown key combination '%s'\n", name);
 	}
 
 // map key to command
@@ -289,10 +357,19 @@ void keymap_add(const char *pars) {
 		strcpy(keycmd, dest);
 		wc ++;
 		}
-	// convert keynames from C-X or ^X to CTRL, A-X or M-X to ALT
-	// if wc == 1 delete last node of the keycode
-	// if wc == 2 assign keycode to keycmd
-	//list_add(keymap, &k, sizeof(keymap_t));
+	// TODO: if wc == 1 delete last node of the keycode
+	// TODO: if wc == 2 assign keycode to keycmd
+
+	// convert keynames from C-X or ^X to CTRL, A-X or M-X to ALT, S-X to shift,
+	// S-C-A combinations are allowed but not by ncurses (man curs_getch)
+	k.key = getkcode(keycode);
+	for ( int i = 0; keyfunc[i].keyword; i ++ ) {
+		if ( strcasecmp(keyfunc[i].keyword, keycmd) == 0 ) {
+			k.id = keyfunc[i].id;
+			list_add(keymap, &k, sizeof(keymap_t));
+			break;
+			}
+		}
 	free(src);
 	}
 
