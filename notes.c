@@ -1,5 +1,5 @@
 /*
- *	notes 
+ *	notes
  *
  *	command-line notebook application
  * 
@@ -77,40 +77,6 @@ static char onstart_cmd[LINE_MAX];
 static char onexit_cmd[LINE_MAX];
 static list_t *exclude;
 
-// name def-key user-key internal-key
-typedef struct { const char *keyword; int id; } keylut_t;
-static keylut_t keynam[] = {
-{ "backspace",	KEY_PRG(KEY_BACKSPACE) },
-{ "del",		KEY_PRG(KEY_DC) },
-{ "ins",		KEY_PRG(KEY_IC) },
-{ "enter",		KEY_PRG(KEY_ENTER) },
-{ "cancel",		KEY_PRG(KEY_CANCEL) },
-{ "quit",		KEY_PRG(KEY_EXIT) },
-//
-{ "up",			KEY_PRG(KEY_UP) },
-{ "down",		KEY_PRG(KEY_DOWN) },
-{ "left",		KEY_PRG(KEY_LEFT) },
-{ "right",		KEY_PRG(KEY_RIGHT) },
-//
-{ "home",		KEY_PRG(KEY_HOME) },
-{ "end",		KEY_PRG(KEY_END) },
-{ "pgup",		KEY_PRG(KEY_PGUP) },
-{ "pgdn",		KEY_PRG(KEY_PGDN) },
-//
-{ "new",		KEY_PRG('n') },
-{ "add",		KEY_PRG('a') },
-{ "view",		KEY_PRG('v') },
-{ "edit",		KEY_PRG('e') },
-{ "delete",		KEY_PRG('d') },
-{ "help",		KEY_PRG(KEY_HELP) },
-{ "tag",		KEY_PRG(KEY_MARK) },
-{ "untag-all",	KEY_PRG('u') },
-{ "search",		KEY_PRG(KEY_FIND) },
-{ NULL, 0 } };
-
-typedef struct { int key; int id; } keymap_t;
-static list_t *keymap;
-
 // returns true if the string 'str' is value of true
 bool istrue(const char *str) {
 	const char *p = str;
@@ -152,6 +118,181 @@ void umenu_add(const char *pars) {
 		strcpy(u.label, p);
 		list_add(umenu, &u, sizeof(umenu_item_t));
 		}
+	free(src);
+	}
+
+// keymap
+
+// name def-key user-key internal-key
+typedef struct { const char *keyword; int id; } keyfunc_t;
+static keyfunc_t keyfunc[] = {
+{ "backspace",	KEY_PRG(KEY_BACKSPACE) },
+{ "enter",		KEY_PRG(KEY_ENTER) },
+{ "cancel",		KEY_PRG(KEY_CANCEL) },
+{ "quit",		KEY_PRG(KEY_EXIT) },
+//
+{ "up",			KEY_PRG(KEY_UP) },
+{ "down",		KEY_PRG(KEY_DOWN) },
+{ "left",		KEY_PRG(KEY_LEFT) },
+{ "right",		KEY_PRG(KEY_RIGHT) },
+//
+{ "home",		KEY_PRG(KEY_HOME) },
+{ "end",		KEY_PRG(KEY_END) },
+{ "pgup",		KEY_PRG(KEY_PGUP) },
+{ "pgdn",		KEY_PRG(KEY_PGDN) },
+{ "insmode",	KEY_PRG(KEY_IC) },
+{ "delchar",	KEY_PRG(KEY_DC) },
+//
+{ "new",		KEY_PRG('n') },
+{ "add",		KEY_PRG('a') },
+{ "view",		KEY_PRG('v') },
+{ "edit",		KEY_PRG('e') },
+{ "delete",		KEY_PRG('d') },
+{ "help",		KEY_PRG(KEY_HELP) },
+{ "tag",		KEY_PRG(KEY_MARK) },
+{ "untag-all",	KEY_PRG('u') },
+{ "search",		KEY_PRG(KEY_FIND) },
+{ NULL, 0 } };
+
+//
+typedef struct { int key; int id; } keymap_t;
+static list_t *keymap;
+
+//
+void setkey(int key, ...) {
+	va_list ap;
+	keymap_t k;
+	int c;
+	
+	k.key = key;
+	k.id = KEY_PRG(key);
+	list_add(keymap, &k, sizeof(keymap_t));
+	
+	va_start(ap, key);
+	while ( (c = va_arg(ap, int)) != 0 ) {
+		k.key = c;
+		list_add(keymap, &k, sizeof(keymap_t));
+		}
+	va_end(ap);
+	}
+
+// setup default keymap
+void set_default_keymap() {
+	setkey(KEY_BACKSPACE, 4, 8, 127, 0);
+	setkey(KEY_ENTER, '\n', '\r', 0);
+	setkey(KEY_CANCEL, 3, 27, '', 0);
+	setkey(KEY_EXIT, 3, 'q', '', 0);
+	
+	setkey(KEY_UP, '', 'k', 0);
+	setkey(KEY_DOWN, '', 'j', 0);
+	setkey(KEY_LEFT, '', 'h', 0);
+	setkey(KEY_RIGHT, '', 'l', 0);
+
+	setkey(KEY_HOME, 1, '^', 0);
+	setkey(KEY_END, '', '$', 0);
+
+	setkey('d', KEY_DC, 0);
+	setkey(KEY_MARK, 't', KEY_IC, 0);
+	setkey(KEY_HELP, '?', KEY_F(1), 0);
+	setkey('e', 0);
+	setkey('v', KEY_ENTER, 0);
+	setkey('n', 0);
+	setkey('a', 0);
+	setkey('u', 0);
+	setkey(KEY_FIND, '/', 0);
+	setkey('c', 0);
+	setkey('f', 0);
+	}
+
+// returns the last defined KEY_PRG code of the 'key'
+int	getkprg(int key) {
+	list_node_t *cur = keymap->head;
+	keymap_t	*map;
+	int			cid = KEY_PRG(key);
+	
+	while ( cur ) {
+		map = (keymap_t *) cur->data;
+		if ( map->key == key )
+			cid = map->id;	// get the last defined
+		cur = (list_node_t *) cur->next;
+		}
+	return cid;
+	}
+
+// map key to command
+void keymap_add(const char *pars) {
+	char	*src = strdup(pars), *p = src;
+	char	dest[64], *d = dest;
+	char	keycode[64], keycmd[64];
+	bool	sq = false, dq = false;
+	int		wc = 0, c;
+	keymap_t k;
+	char str[16];
+	
+	while ( isblank(*p) )	p ++;
+	while ( *p ) {
+		if ( *p == '\'' )
+			sq = !sq;
+		else if ( !sq ) {
+			if ( *p == '"' )
+				dq = !dq;
+			else if ( *p == '\\' ) {
+				p ++;
+				switch ( *p ) {
+				case 't': *d ++ = '\t'; p ++; break;
+				case 'r': *d ++ = '\r'; p ++; break;
+				case 'n': *d ++ = '\n'; p ++; break;
+				case 'v': *d ++ = '\v'; p ++; break;
+				case 'e': *d ++ = '\033'; p ++; break;
+				case 'a': *d ++ = '\a'; p ++; break;
+				case 'b': *d ++ = '\b'; p ++; break;
+				case 'f': *d ++ = '\f'; p ++; break;
+				case 'x':
+					p ++;
+					str[0] = (isxdigit(*p)) ? *p ++ : 0;
+					str[1] = (isxdigit(*p)) ? *p ++ : 0;
+					str[2] = 0;
+					*d ++ = strtol(str, NULL, 16);
+					break;
+				default:
+					if ( *p >= '0' && *p < '8') {
+						c = 0;
+						if ( *p >= '0' && *p < '8' ) { c = (c << 3) | (*p - '0'); p ++; }
+						if ( *p >= '0' && *p < '8' ) { c = (c << 3) | (*p - '0'); p ++; }
+						if ( *p >= '0' && *p < '8' ) { c = (c << 3) | (*p - '0'); p ++; }
+						*d ++ = c;
+						}
+					else
+						*d ++ = *p ++;
+					}
+				continue;
+				}
+			else if ( !dq ) {
+				if ( isblank(*p) ) {
+					*d = '\0';
+					d = dest;
+					while ( isblank(*p) )	p ++;
+					wc ++;
+					if ( wc == 1 )
+						strcpy(keycode, dest);
+					if ( wc == 2 ) {
+						strcpy(keycmd, dest);
+						break;
+						}
+					}
+				}
+			}
+		*d ++ = *p ++;
+		}
+	if ( d != dest && wc == 1 ) {
+		*d = '\0';
+		strcpy(keycmd, dest);
+		wc ++;
+		}
+	// convert keynames from C-X or ^X to CTRL, A-X or M-X to ALT
+	// if wc == 1 delete last node of the keycode
+	// if wc == 2 assign keycode to keycmd
+	//list_add(keymap, &k, sizeof(keymap_t));
 	free(src);
 	}
 
@@ -277,8 +418,9 @@ var_t var_table[] = {
 typedef struct { const char *name; void (*func_p)(const char *); } cmd_t;
 cmd_t cmd_table[] = {
 	{ "exclude", excl_add_pat },
-	{ "rule", rule_add },
+	{ "rule",  rule_add },
 	{ "umenu", umenu_add },
+	{ "map",   keymap_add },
 	{ NULL, NULL } };
 
 // assign variables
@@ -1436,6 +1578,7 @@ void init() {
 	exclude = list_create();
 	rules = list_create();
 	umenu = list_create();
+	keymap = list_create();
 	notes = list_create();
 	sections = list_create();
 	
@@ -1494,6 +1637,7 @@ void cleanup() {
 	exclude = list_destroy(exclude);
 	rules = list_destroy(rules);
 	umenu = list_destroy(umenu);
+	keymap = list_destroy(keymap);
 	notes = list_destroy(notes);
 	sections = list_destroy(sections);
 	}
