@@ -43,7 +43,7 @@
 
 #include "list.h"
 #include "str.h"
-#include "nc-lib.h"
+#include "nc-plus.h"
 
 #define OPT_AUTO	0x0001
 #define OPT_LIST	0x0002
@@ -161,144 +161,40 @@ static keyfunc_t keyfunc[] = {
 { "search",		KEY_PRG(KEY_FIND) },
 { NULL, 0 } };
 
-//
-typedef struct { int key; int id; char map[32]; } keymap_t;
-static list_t *keymap;
-
-//
-void setkey(const char *map, int key, ...) {
-	va_list ap;
-	keymap_t k;
-	int c;
-	
-	k.key = key;
-	strcpy(k.map, map);
-	k.id = KEY_PRG(key);
-	list_add(keymap, &k, sizeof(keymap_t));
-	
-	va_start(ap, key);
-	while ( (c = va_arg(ap, int)) != 0 ) {
-		k.key = c;
-		list_add(keymap, &k, sizeof(keymap_t));
-		}
-	va_end(ap);
-	}
-
 // setup default keymap
 void set_default_keymap() {
-	setkey("nav", KEY_BACKSPACE, 4, 8, 127, 0);
-	setkey("input", KEY_BACKSPACE, 4, 8, 127, 0);
-	setkey("nav", KEY_ENTER, '\n', '\r', 0);
-	setkey("input", KEY_ENTER, '\n', '\r', 0);
-	setkey("nav", KEY_CANCEL, 3, 27, '', 0);
-	setkey("input", KEY_CANCEL, 3, 27, '', '', 0);
-	setkey("nav", KEY_EXIT, 3, 'q', '', 0);
+	nc_use_default_keymap();
+	nc_addkey("input", KEY_CANCEL, 3);
 	
-	setkey("nav", KEY_UP, '', 'k', 0);
-	setkey("nav", KEY_DOWN, '', 'j', 0);
-	setkey("nav", KEY_LEFT, '', 'h', 0);
-	setkey("nav", KEY_RIGHT, '', 'l', 0);
-
-	setkey("input", KEY_UP, '', 0);
-	setkey("input", KEY_DOWN, '', 0);
-	setkey("input", KEY_LEFT, '', 0);
-	setkey("input", KEY_RIGHT, '', 0);
-
-	setkey("nav", KEY_HOME, 1, 'g', '^', 0);
-	setkey("nav", KEY_END, '', 'G', '$', 0);
-	setkey("input", KEY_HOME, 1, 0);
-	setkey("input", KEY_END, '', 0);
-
-	setkey("nav", KEY_HELP, '?', KEY_F(1), 0); // help
-	setkey("nav", KEY_DC, 'd', KEY_F(8), 0);	// delete
-	setkey("nav", 'v', KEY_F(3), 0); // view
-	setkey("nav", 'e', KEY_F(4), 0); // edit
-	setkey("nav", 'n', 0);	// new
-	setkey("nav", 'a', 0);	// add
-	setkey("nav", KEY_MARK, 't', KEY_IC, 0);	// tag/untag
-	setkey("nav", 'u', KEY_F(9), 0);	// untag all
-	setkey("nav", 'r', KEY_F(6), 0);	// rename
-	setkey("nav", KEY_FIND, '/', KEY_F(7), 0); // search
-	setkey("nav", 'c', 0); // change section (move-to)
-	setkey("nav", 's', 0);	// select section (filter)
-	setkey("nav", 'm', KEY_F(2), 0);	// user-defined menu
-	setkey("nav", '!', KEY_F(10), 0);	// execute
-//	setkey("nav", 'f', 0);	// set filter test
-	setkey("nav", 'f', 0);	// file manager
-	}
-
-// returns the last defined KEY_PRG code of the 'key'
-int	getkprg(int key, const char *smap) {
-	list_node_t *cur = keymap->head;
-	keymap_t	*map;
-	int			cid = KEY_PRG(key);
+	nc_setkey("nav", KEY_BACKSPACE, 4, 8, 127, 0);
+	nc_setkey("nav", KEY_ENTER, '\n', '\r', 0);
+	nc_setkey("nav", KEY_CANCEL, 3, 27, '', 0);
+	nc_setkey("nav", KEY_EXIT, 3, 'q', '', 0);
+	nc_setkey("nav", KEY_REFRESH, '', 0);
 	
-	while ( cur ) {
-		map = (keymap_t *) cur->data;
-		if ( map->key == key && strcmp(map->map, smap) == 0 )
-			cid = map->id;	// get the last defined
-		cur = (list_node_t *) cur->next;
-		}
-	return cid;
-	}
+	nc_setkey("nav", KEY_UP, '', 'k', 0);
+	nc_setkey("nav", KEY_DOWN, '', 'j', 0);
+	nc_setkey("nav", KEY_LEFT, '', 'h', 0);
+	nc_setkey("nav", KEY_RIGHT, '', 'l', 0);
+	nc_setkey("nav", KEY_HOME, 1, 'g', '^', 0);
+	nc_setkey("nav", KEY_END, '', 'G', '$', 0);
 
-// returns the key-code from a string
-int getkcode(const char *name) {
-	const char *p = name;
-	int   flags = 0, c = 0;
-	char	str[4];
-
-	if ( *p == '^' ) {
-		flags |= 0x2;
-		p ++;
-		}
-	else {
-		while ( p[1] == '-' ) {
-			switch ( toupper(*p) ) {
-			case 'S': flags |= 0x1; break;
-			case 'C': flags |= 0x2; break;
-			case 'A': case 'M': flags |= 0x4; break;
-			default: // error
-				fprintf(stderr, "unknown key combination '%s'\n", name);
-				return 0;
-				}
-			p += 2;
-			}
-		}
-	
-	if ( toupper(*p) == 'F' && isdigit(*(p+1)) ) {
-		str[0] = p[1];
-		str[2] = ( isdigit(p[2]) ) ? p[2] : '\0';
-		str[3] = '\0';
-		// flags does not works with ncurses... man -s 3 curs_getch
-		return KEY_F(atoi(str));
-		}
-	
-	if ( strcasecmp(p, "enter") == 0 )	return KEY_ENTER;
-	else if ( strcasecmp(p, "esc") == 0 )	return 27;
-	else if ( strcasecmp(p, "tab") == 0 )	return 9;
-	else if ( strcasecmp(p, "home") == 0 )	return (flags & 0x1) ? KEY_SHOME : KEY_HOME;
-	else if ( strcasecmp(p, "end") == 0 )	return (flags & 0x1) ? KEY_SEND : KEY_END;
-	else if ( strcasecmp(p, "pgup") == 0 )	return KEY_PGUP;
-	else if ( strcasecmp(p, "pageup") == 0 )	return KEY_PGUP;
-	else if ( strcasecmp(p, "pgdn") == 0 )	return KEY_PGDN;
-	else if ( strcasecmp(p, "pagedn") == 0 )	return KEY_PGDN;
-	else if ( strcasecmp(p, "pagedown") == 0 )	return KEY_PGDN;
-	else if ( strcasecmp(p, "up") == 0 )		return KEY_UP;
-	else if ( strcasecmp(p, "down") == 0 )	return KEY_DOWN;
-	else if ( strcasecmp(p, "left") == 0 )	return (flags & 0x1) ? KEY_SLEFT : KEY_LEFT;
-	else if ( strcasecmp(p, "right") == 0 )	return (flags & 0x1) ? KEY_SRIGHT : KEY_RIGHT;
-	else if ( strcasecmp(p, "insert") == 0 )	return (flags & 0x1) ? KEY_SIC : KEY_IC;
-	else if ( strcasecmp(p, "delete") == 0 )	return (flags & 0x1) ? KEY_SDC : KEY_DC;
-	else if ( strcasecmp(p, "ins") == 0 )	return (flags & 0x1) ? KEY_SIC : KEY_IC;
-	else if ( strcasecmp(p, "del") == 0 )	return (flags & 0x1) ? KEY_SDC : KEY_DC;
-	else {
-		c = ( flags & 0x3 ) ? toupper(*p) : *p;
-		if ( flags & 0x2 )	c = (c >= '@') ? c - '@' : c;
-		if ( flags & 0x4 )	c |= KEY_ALT_BIT;
-		return c;
-		}
-	fprintf(stderr, "unknown key combination '%s'\n", name);
+	nc_setkey("nav", KEY_HELP, '?', KEY_F(1), 0); // help
+	nc_setkey("nav", KEY_DC, 'd', KEY_F(8), 0);	// delete
+	nc_setkey("nav", 'v', KEY_F(3), 0); // view
+	nc_setkey("nav", 'e', KEY_F(4), 0); // edit
+	nc_setkey("nav", 'n', 0);	// new
+	nc_setkey("nav", 'a', 0);	// add
+	nc_setkey("nav", KEY_MARK, 't', KEY_IC, 0);	// tag/untag
+	nc_setkey("nav", 'u', KEY_F(9), 0);	// untag all
+	nc_setkey("nav", 'r', KEY_F(6), 0);	// rename
+	nc_setkey("nav", KEY_FIND, '/', KEY_F(7), 0); // search
+	nc_setkey("nav", 'c', 0); // change section (move-to)
+	nc_setkey("nav", 's', 0);	// select section (filter)
+	nc_setkey("nav", 'm', KEY_F(2), 0);	// user-defined menu
+	nc_setkey("nav", '!', KEY_F(10), 0);	// execute
+//	nc_setkey("nav", 'f', 0);	// set filter test
+	nc_setkey("nav", 'f', 0);	// file manager
 	}
 
 // map key to command
@@ -308,7 +204,6 @@ void keymap_add(const char *pars) {
 	char	keycode[64], keycmd[64], kmap[64];
 	bool	sq = false, dq = false;
 	int		wc = 0, c;
-	keymap_t k;
 	char str[16];
 	
 	while ( isblank(*p) )	p ++;
@@ -377,28 +272,17 @@ void keymap_add(const char *pars) {
 	if ( wc > 1 ) {
 		// convert keynames from C-X or ^X to CTRL, A-X or M-X to ALT, S-X to shift,
 		// S-C-A combinations are allowed but not by ncurses (man curs_getch)
-		k.key = getkcode(keycode);
-		strcpy(k.map, kmap);
-		
+		int key = nc_getkeycode(keycode);
+
 		// if wc == 2 delete nodes of the keycode
-		if ( wc == 2 ) {
-			list_node_t	*cur = keymap->head, *next;
-			keymap_t	*this_k;
-			while ( cur ) {
-				this_k = (keymap_t *) cur->data;
-				next = (list_node_t *) cur->next;
-				if ( this_k->key == k.key && strcmp(this_k->map, k.map) == 0 )
-					list_delete(keymap, cur); // delete this
-				cur = next;
-				}
-			}
+		if ( wc == 2 )
+			nc_delkey(kmap, key);
 
 		// if wc == 3 assign keycode to keycmd
 		if ( wc == 3 ) {
 			for ( int i = 0; keyfunc[i].keyword; i ++ ) {
 				if ( strcasecmp(keyfunc[i].keyword, keycmd) == 0 ) {
-					k.id = keyfunc[i].id;
-					list_add(keymap, &k, sizeof(keymap_t));
+					nc_addkey(kmap, keyfunc[i].id, key);
 					break;
 					}
 				}
@@ -507,7 +391,7 @@ bool rule_exec(int action, const char *fn) {
 			note_shell(rule->command, file);
 			return true;
 			}
-		cur = (list_node_t *) cur->next;
+		cur = cur->next;
 		}
 	return false;
 	}
@@ -653,7 +537,7 @@ void note_pl(const note_t *note) {
 		printf("%s\n", note->file);
 	else {
 		size_t	seclen = 0;
-		for ( list_node_t *cur = sections->head; cur; cur = (list_node_t *) cur->next )
+		for ( list_node_t *cur = sections->head; cur; cur = cur->next )
 			seclen = MAX(seclen, strlen((const char *) cur->data));
 		printf("%-*s (%-3s) - %s\n", seclen, note->section, note->ftype, note->name);
 		}
@@ -686,7 +570,7 @@ bool dirwalk_checkfn(const char *fn) {
 	
     if ( strcmp(fn, ".") == 0 || strcmp(fn, "..") == 0 )
 		return false;
-	for ( cur = exclude->head; cur; cur = (list_node_t *) cur->next ) {
+	for ( cur = exclude->head; cur; cur = cur->next ) {
 		if ( fnmatch((const char *) cur->data, fn, FNM_PATHNAME | FNM_PERIOD | FNM_EXTMATCH | FNM_CASEFOLD) == 0 )
 			return false;
 		}
@@ -774,7 +658,7 @@ void normalize_section_name(char *section) {
 	list_node_t *cur;
 	note_t		*note;
 
-	for ( cur = notes->head; cur; cur = (list_node_t *) cur->next ) {
+	for ( cur = notes->head; cur; cur = cur->next ) {
 		note = (note_t *) cur->data;
 		if ( strcasecmp(note->section, section) == 0 ) {
 			strcpy(section, note->section);
@@ -935,12 +819,12 @@ void ex_print_note(const note_t *note) {
 	
 	werase(w_prv);
 	if ( note ) {
-		nc_wprintf(w_prv, "Name: \eb+%s\eb-", note->name);
+		nc_wprintf(w_prv, "Name: $B%s$b", note->name);
 		if ( strlen(note->section) )
-			nc_wprintf(w_prv, ", Section: \eb+%s\eb-", note->section);
-		nc_wprintf(w_prv, "\nFile: \eb+%s\eb-\n", note->file);
-		nc_wprintf(w_prv, "Date: \eb+%s\eb-\n", sdate(&note->st.st_mtime, buf));
-		nc_wprintf(w_prv, "Stat: \eb+%6d\eb- bytes, mode \eb+0%o\eb-, owner \eb+%d\eb-:\eb+%d\eb-\n",
+			nc_wprintf(w_prv, ", Section: $B%s$b", note->section);
+		nc_wprintf(w_prv, "\nFile: $B%s$b\n", note->file);
+		nc_wprintf(w_prv, "Date: $B%s$b\n", sdate(&note->st.st_mtime, buf));
+		nc_wprintf(w_prv, "Stat: $B%6d$b bytes, mode $B0%o$b, owner $B%d$b:$B%d$b\n",
 			note->st.st_size, note->st.st_mode & 0777, note->st.st_uid, note->st.st_gid);
 		for ( int i = 0; i < getmaxx(w_prv); i ++ ) wprintw(w_prv, "─");
 		if ( (fp = fopen(note->file, "rt")) != NULL ) {
@@ -989,7 +873,7 @@ static int t_str_cmp(const void *va, const void *vb) {
 	}
 
 // help
-static char *ex_help_s = "$? help, $quit, $view, $edit, $rename, $delete, $new, $/ search, $section, $tag, $untag all";
+static char *ex_help_s = "&? help, &quit, &view, &edit, &rename, &delete, &new, &/ search, &section, &tag, &untag all";
 static char ex_help[LINE_MAX];
 static char *ex_help_long = "\
 ?, F1  ... Help. This window.\n\
@@ -1076,19 +960,27 @@ int	ex_find(const char *name) {
 void ex_colorize(char *dest, const char *src) {
 	const char *p = src, *e;
 	char *d = dest;
-	char nextchar[8];
+	char cstart[16], cend[16];
 	
-	if ( has_colors() ) strcpy(nextchar, "\ec74");
-	else strcpy(nextchar, "\eu");
+	if ( has_colors() ) { 
+		strcpy(cstart, "$C74"); 
+		strcpy(cend, "$c"); 
+		}
+	else { 
+		strcpy(cstart, "$U");
+		strcpy(cend, "$u"); 
+		}
 	
 	for ( p = src; *p; p ++ ) {
-		if ( *p == '$' ) {
+		if ( *p == '&' ) {
 			p ++;
-			for ( e = nextchar; *e; e ++ ) *d ++ = *e;
-			*d ++ = '+';
-			*d ++ = *p;
-			for ( e = nextchar; *e; e ++ ) *d ++ = *e;
-			*d ++ = '-';
+			if ( *p != '&' ) {
+				for ( e = cstart; *e; e ++ ) *d ++ = *e;
+				*d ++ = *p;
+				for ( e = cend; *e; e ++ ) *d ++ = *e;
+				}
+			else
+				*d ++ = *p;
 			}
 		else
 			*d ++ = *p;
@@ -1136,7 +1028,7 @@ int ex_tagged_shell(const char *cmd, list_t *tagged) {
 	size_t root_dir_len = strlen(ndir) + 1;
 
 	files[0] = '\0';
-	for ( list_node_t *cur = tagged->head; cur; cur = (list_node_t *) cur->next ) {
+	for ( list_node_t *cur = tagged->head; cur; cur = cur->next ) {
 		p = ((note_t *) (cur->data))->file;
 		if ( cur != tagged->head ) // add separator
 			strcat(files, " ");
@@ -1222,7 +1114,7 @@ void explorer() {
 
 		// input string mode
 		if ( mode == ex_search ) {
-			pf = getkprg(ch, "input");
+			pf = nc_getprg("input", ch);
 			wchar_t wch = (wchar_t) ch;
 			if ( u8ischar(ch) ) {
 				char mbs[5];
@@ -1298,7 +1190,7 @@ void explorer() {
 
 		// navigation mode
 		else if ( mode == ex_nav ) {
-			pf = getkprg(ch, "nav");
+			pf = nc_getprg("nav", ch);
 //			fprintf(stderr, "%04X %04X %d\n", pf, ch, ch);
 			switch ( KPRG_KEY(pf) ) {
 			case KEY_RESIZE:
@@ -1449,7 +1341,7 @@ void explorer() {
 							
 							// move files
 							int succ = 0, fail = 0;
-							for ( list_node_t *cur = tagged->head; cur; cur = (list_node_t *) cur->next ) {
+							for ( list_node_t *cur = tagged->head; cur; cur = cur->next ) {
 								note_t *cn = (note_t *) cur->data;
 								note_backup(cn);
 								note_t *nn = make_note(cn->name, new_section, 0);
@@ -1508,7 +1400,7 @@ void explorer() {
 						if ( !list_count(tagged) )
 							list_addptr(tagged, t_notes[pos]);
 						int succ = 0, fail = 0;
-						for ( list_node_t *cur = tagged->head; cur; cur = (list_node_t *) cur->next )
+						for ( list_node_t *cur = tagged->head; cur; cur = cur->next )
 							(note_delete(cur->data)) ? succ ++ : fail ++;
 						if ( succ == 1 ) sprintf(status, "one note deleted%c", ((fail)?';':'.'));
 						else sprintf(status, "%d notes deleted%c", succ, ((fail)?';':'.'));
@@ -1627,7 +1519,6 @@ void init() {
 	exclude = list_create();
 	rules = list_create();
 	umenu = list_create();
-	keymap = list_create();
 	notes = list_create();
 	sections = list_create();
 	
@@ -1686,7 +1577,6 @@ void cleanup() {
 	exclude = list_destroy(exclude);
 	rules = list_destroy(rules);
 	umenu = list_destroy(umenu);
-	keymap = list_destroy(keymap);
 	notes = list_destroy(notes);
 	sections = list_destroy(sections);
 	}
@@ -1859,11 +1749,11 @@ int main(int argc, char *argv[]) {
 			// create / truncate / open-for-append file
 			if ( (fp = fopen(note->file, ((opt_flags & OPT_APPD) ? "a" : "w"))) != NULL ) {
 				exit_code = EXIT_SUCCESS;
-				cur_arg = (list_node_t *) cur_arg->next;
+				cur_arg = cur_arg->next;
 				while ( cur_arg ) {
 					if ( print_file_to((const char *) cur_arg->data, fp) )
 						printf("* '%s' copied *\n", (const char *) cur_arg->data);
-					cur_arg = (list_node_t *) cur_arg->next;
+					cur_arg = cur_arg->next;
 					}
 				if ( opt_flags & OPT_STDIN ) // the '-' option used
 					print_file_to(NULL, fp);
@@ -1894,9 +1784,9 @@ int main(int argc, char *argv[]) {
 
 		// get list of notes according the pattern (argv)
 		const char *note_pat = (const char *) cur_arg->data;
-		cur_arg = (list_node_t *) cur_arg->next;
+		cur_arg = cur_arg->next;
 		list_t *res = list_create(); // list of results
-		for ( list_node_t *np = notes->head; np; np = (list_node_t *) np->next ) {
+		for ( list_node_t *np = notes->head; np; np = np->next ) {
 			note = (note_t *) np->data;
 			if ( sectionf ) {
 				if ( strcmp(current_section, note->section) != 0 )
@@ -1971,7 +1861,7 @@ int main(int argc, char *argv[]) {
 					}
 
 				// next note
-				cur = (list_node_t *) cur->next;
+				cur = cur->next;
 				}
 			}
 		else {

@@ -21,7 +21,7 @@
 
 #include <wchar.h>
 #include <stdlib.h>
-#include "nc-lib.h"
+#include "nc-plus.h"
 
 //
 bool nc_mvweditstr(WINDOW *w, int y, int x, char *u8str, int maxlen) {

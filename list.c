@@ -28,12 +28,17 @@ list_t *list_create() {
 	return list;
 	}
 
+// initialize a list
+void list_init(list_t *list) {
+	list->head = list->tail = NULL;
+	}
+
 // deletes all elements of the list
 void list_clear(list_t *list) {
 	list_node_t *cur = list->head, *pre;
 	while ( cur ) {
 		pre = cur;
-		cur = (list_node_t *) cur->next;
+		cur = cur->next;
 		if ( pre->size )
 			free(pre->data);
 		free(pre);
@@ -83,7 +88,7 @@ list_node_t *list_addptr(list_t *list, void *ptr)
 // delete node
 bool list_delete(list_t *list, list_node_t *node) {
 	list_node_t	*cur, *prev = NULL;
-	for ( cur = list->head; cur; cur = (list_node_t *) cur->next ) {
+	for ( cur = list->head; cur; cur = cur->next ) {
 		if ( cur == node ) {
 			if ( prev )					prev->next = cur->next;
 			if ( cur == list->head )	list->head = cur->next;
@@ -112,7 +117,7 @@ list_node_t **list_to_index(list_t *list) {
 	size_t	i, count = list_count(list);
 	list_node_t *cur;
 	table = (list_node_t **) malloc(sizeof(list_node_t*) * (count + 1));
-	for ( i = 0, cur = list->head; cur; cur = (list_node_t *) cur->next, i ++ )
+	for ( i = 0, cur = list->head; cur; cur = cur->next, i ++ )
 		table[i] = cur;
 	table[count] = NULL;
 	return table;
@@ -125,7 +130,7 @@ void **list_to_table(list_t *list) {
 	size_t	i, count = list_count(list);
 	list_node_t *cur;
 	table = (void **) malloc(sizeof(void*) * (count + 1));
-	for ( i = 0, cur = list->head; cur; cur = (list_node_t *) cur->next, i ++ )
+	for ( i = 0, cur = list->head; cur; cur = cur->next, i ++ )
 		table[i] = cur->data;
 	table[i] = NULL;
 	return table;
@@ -133,7 +138,7 @@ void **list_to_table(list_t *list) {
 
 // find and return note by comparing 'data' as string
 list_node_t *list_findstr(list_t *list, const char *str) {
-	for ( list_node_t *cur = list->head; cur; cur = (list_node_t *) cur->next )
+	for ( list_node_t *cur = list->head; cur; cur = cur->next )
 		if ( strcmp((const char *) cur->data, str) == 0 )
 			return cur;
 	return NULL;
@@ -141,7 +146,7 @@ list_node_t *list_findstr(list_t *list, const char *str) {
 
 // find and return note by memory address
 list_node_t *list_findptr(list_t *list, const void *ptr) {
-	for ( list_node_t *cur = list->head; cur; cur = (list_node_t *) cur->next )
+	for ( list_node_t *cur = list->head; cur; cur = cur->next )
 		if ( cur->data == ptr )
 			return cur;
 	return NULL;

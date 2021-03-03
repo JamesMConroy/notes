@@ -22,7 +22,7 @@
 #include <stdbool.h>
 #include <ctype.h>
 #include <wctype.h>
-#include "nc-lib.h"
+#include "nc-plus.h"
 
 /*
  * returns the selected item index or -1

@@ -2,7 +2,7 @@
 # note: ps2pdf produces better results
 
 APPNAME := notes
-ADDMODS := str.o nc-readstr.o nc-core.o nc-view.o nc-list.o notes.o list.o
+ADDMODS := str.o nc-readstr.o nc-core.o nc-keyb.o nc-view.o nc-list.o notes.o list.o
 INSTALL := /usr/local/bin
 MANDIR1 := /usr/local/share/man/man1
 MANDIR5 := /usr/local/share/man/man5

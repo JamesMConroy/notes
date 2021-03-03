@@ -34,11 +34,16 @@ extern "C" {
 #include <limits.h>
 #include <stdbool.h>
 
-typedef struct { void *data; size_t size; void *next; } list_node_t;
-typedef struct { list_node_t *head, *tail; } list_t;
+typedef struct list_node_s { void *data; size_t size; struct list_node_s *next; } list_node_t;
+typedef struct list_s { list_node_t *head, *tail; } list_t;
 
 // create a new list and returns the pointer
 list_t *list_create();
+
+// for non-dynamic (and non-static) allocated lists you need to initialize them first
+// for a non-dynamic allocated list use list_clear() instead of list_destroy()
+// to free their contents.
+void list_init(list_t *list);
 
 // deletes all elements of the list
 void list_clear(list_t *list);

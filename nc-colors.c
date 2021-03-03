@@ -1,3 +1,6 @@
+/*
+ * ncurses - test colors
+ */
 #include <ncurses.h>
 
 static int ncvgac(int fg, int bg) {

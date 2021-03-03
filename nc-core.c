@@ -19,18 +19,16 @@
  * 	Written by Nicholas Christopoulos <nereus@freemail.gr>
  */
 
-#include "nc-lib.h"
+#include "nc-plus.h"
 
 typedef struct { int fg, bg, id; } pair_t;
 static pair_t*	pair_table = NULL;
 static int		pair_count = 0;
 
+// translate table from ANSI to VGA
 static int to_vga[] = 
-// 0  1  2  3  4  5  6  7  8   9  10  11  12  13  14  15
-{  0, 4, 2, 6, 1, 5, 3, 7, 8, 12, 10, 14,  9, 13, 11, 15 };
-
-//#define COLOR_DGRAY		0xEC
-//#define COLOR_GRAY		0xF0
+//   VGA     0  1  2  3  4  5  6  7  8   9  10  11  12  13  14  15
+{ /* ANSI */ 0, 4, 2, 6, 1, 5, 3, 7, 8, 12, 10, 14,  9, 13, 11, 15 };
 
 // create a new color pair and store it to pair_table
 int nc_createpair(int fg, int bg) {
@@ -139,8 +137,19 @@ static void nc_hpair(WINDOW *win, int mode, char d1, char d0) {
 	}
 
 // print with codes/colors
-#define ccase(c,a) case (c): ( p[1] == '+' ) ? wattron(win, (a)) : wattroff(win, (a)); p ++; break;
+#define ccase(c,a) \
+	case (c): { if ( *p == toupper(c) ) wattron(win, (a)); else wattroff(win, (a)); break; }
 
+#define	CSTACK_MAX	16
+static int cstack[CSTACK_MAX], csp;
+
+// ncurses printf with codes/colors
+// $ = escape character, $$ = print dolar
+// $B,$U,$R,$D = enable bold, underline, reverse, dim
+// $b,$u,$r,$d = disable bold, underline, reverse, dim
+// $Cxx = set VGA colors, x is hexadecimal digit, both digits represents VGA
+// text mode attributes (blink|intensity-background-foreground)
+//
 void nc_mvwprintf(WINDOW *win, int y, int x, const char *fmt, ...) {
 	char	msg[LINE_MAX], buf[LINE_MAX];
 	char	*p = msg, *b = buf;
@@ -159,32 +168,35 @@ void nc_mvwprintf(WINDOW *win, int y, int x, const char *fmt, ...) {
 		
 	while ( *p ) {
 		switch ( *p ) {
-		case 27:
+		case '$':
 			p ++;
-			if ( b > buf ) { *b = '\0'; waddstr(win, buf); b = buf; }
-			switch ( *p ) {
+			if ( b > buf ) { *b = '\0'; waddstr(win, buf); b = buf; } // flash buffer
+			switch ( tolower(*p) ) {
 			ccase('b', A_BOLD)
 			ccase('r', A_REVERSE)
 			ccase('d', A_DIM)
 			ccase('u', A_UNDERLINE)
 			case 'c': // vga color
-				p ++;
-				if ( isxdigit(*p) && isxdigit(p[1]) ) {
-					if ( has_colors() )
-						nc_hclr(win, (p[2] == '+'), p[0], p[1]);
-					p += 2;
+				if ( *p == toupper(*p) ) {
+					p ++;
+					if ( isxdigit(*p) && isxdigit(p[1]) ) {
+						if ( csp < CSTACK_MAX ) {
+							if ( has_colors() )
+								nc_hclr(win, true, p[0], p[1]);
+							cstack[csp++] = (p[0] << 8) | p[1];
+							}
+						p ++;
+						}
 					}
-				break;
-			case 'C': // select pair
-				p ++;
-				if ( isxdigit(*p) && isxdigit(p[1]) ) {
-					if ( has_colors() )
-						nc_hpair(win, (p[2] == '+'), p[0], p[1]);
-					p += 2;
+				else { // pop previous colors
+					if ( csp ) {
+						int c = cstack[--csp];
+						if ( has_colors() )
+							nc_hclr(win, false, c >> 8, c & 0xFF);
+						}
 					}
 				break;
 			default: // not recognized
-				*b ++ = '\033';
 				*b ++ = *p;
 				}
 			break;
@@ -193,7 +205,7 @@ void nc_mvwprintf(WINDOW *win, int y, int x, const char *fmt, ...) {
 			}
 		p ++;
 		}
-	if ( b > buf ) { *b = '\0'; waddstr(win, buf); b = buf; }
+	if ( b > buf ) { *b = '\0'; waddstr(win, buf); b = buf; } // flash buffer
 	}
 #undef ccase
 

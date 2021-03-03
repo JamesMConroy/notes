@@ -19,7 +19,7 @@
  * 	Written by Nicholas Christopoulos <nereus@freemail.gr>
  */
 
-#include "nc-lib.h"
+#include "nc-plus.h"
 
 //
 void nc_view(const char *title, const char *body) {
@@ -51,10 +51,10 @@ void nc_view(const char *title, const char *body) {
 			offset = lines - getmaxy(w);
 			if ( offset < 0 ) offset = 0;
 			// ␄
-			nc_mvwprintf(wout, getmaxy(wout) - 2, getmaxx(wout) - 3, "\ec20+ \ec20-");
+			nc_mvwprintf(wout, getmaxy(wout) - 2, getmaxx(wout) - 3, "$C20 $c");
 			}
 		else
-			nc_mvwprintf(wout, getmaxy(wout) - 2, getmaxx(wout) - 3, "\ec20+↓\ec20-");
+			nc_mvwprintf(wout, getmaxy(wout) - 2, getmaxx(wout) - 3, "$C20↓$c");
 		wrefresh(wout);
 
 		//

@@ -1,3 +1,6 @@
+/*
+ * ncurses - test getch
+ */
 #include <stdio.h>
 #include <ncurses.h>
 
