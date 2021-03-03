@@ -147,7 +147,8 @@ static keyfunc_t keyfunc[] = {
 { "add",		KEY_PRG('a') },
 { "view",		KEY_PRG('v') },
 { "edit",		KEY_PRG('e') },
-{ "delete",		KEY_PRG('d') },
+{ "delete",		KEY_PRG(KEY_DC) },
+{ "rename",		KEY_PRG('r') },
 { "help",		KEY_PRG(KEY_HELP) },
 { "tag",		KEY_PRG(KEY_MARK) },
 { "shell",		KEY_PRG('!') },
@@ -161,16 +162,17 @@ static keyfunc_t keyfunc[] = {
 { NULL, 0 } };
 
 //
-typedef struct { int key; int id; } keymap_t;
+typedef struct { int key; int id; char map[32]; } keymap_t;
 static list_t *keymap;
 
 //
-void setkey(int key, ...) {
+void setkey(const char *map, int key, ...) {
 	va_list ap;
 	keymap_t k;
 	int c;
 	
 	k.key = key;
+	strcpy(k.map, map);
 	k.id = KEY_PRG(key);
 	list_add(keymap, &k, sizeof(keymap_t));
 	
@@ -184,44 +186,56 @@ void setkey(int key, ...) {
 
 // setup default keymap
 void set_default_keymap() {
-	setkey(KEY_BACKSPACE, 4, 8, 127, 0);
-	setkey(KEY_ENTER, '\n', '\r', 0);
-	setkey(KEY_CANCEL, 3, 27, '', 0);
-	setkey(KEY_EXIT, 3, 'q', '', 0);
+	setkey("nav", KEY_BACKSPACE, 4, 8, 127, 0);
+	setkey("input", KEY_BACKSPACE, 4, 8, 127, 0);
+	setkey("nav", KEY_ENTER, '\n', '\r', 0);
+	setkey("input", KEY_ENTER, '\n', '\r', 0);
+	setkey("nav", KEY_CANCEL, 3, 27, '', 0);
+	setkey("input", KEY_CANCEL, 3, 27, '', '', 0);
+	setkey("nav", KEY_EXIT, 3, 'q', '', 0);
 	
-	setkey(KEY_UP, '', 'k', 0);
-	setkey(KEY_DOWN, '', 'j', 0);
-	setkey(KEY_LEFT, '', 'h', 0);
-	setkey(KEY_RIGHT, '', 'l', 0);
+	setkey("nav", KEY_UP, '', 'k', 0);
+	setkey("nav", KEY_DOWN, '', 'j', 0);
+	setkey("nav", KEY_LEFT, '', 'h', 0);
+	setkey("nav", KEY_RIGHT, '', 'l', 0);
 
-	setkey(KEY_HOME, 1, '^', 0);
-	setkey(KEY_END, '', '$', 0);
+	setkey("input", KEY_UP, '', 0);
+	setkey("input", KEY_DOWN, '', 0);
+	setkey("input", KEY_LEFT, '', 0);
+	setkey("input", KEY_RIGHT, '', 0);
 
-	setkey('?', KEY_F(1), 0); // help
-	setkey('d', KEY_DC, 0);	// delete
-	setkey('v', KEY_ENTER, 0); // view
-	setkey('e', 0); // edit
-	setkey('n', 0);	// new
-	setkey('a', 0);	// add
-	setkey('t', KEY_IC, 0);	// tag/untag
-	setkey('u', 0);	// untag all
-	setkey('/', KEY_F(7), 0); // search
-	setkey('c', 0); // change section (move-to)
-	setkey('s', 0);	// select section (filter)
-	setkey('m', KEY_F(2), 0);	// user-defined menu
-	setkey('!', KEY_F(10), 0);	// execute
-	setkey('f', 0);	// set filter test
+	setkey("nav", KEY_HOME, 1, 'g', '^', 0);
+	setkey("nav", KEY_END, '', 'G', '$', 0);
+	setkey("input", KEY_HOME, 1, 0);
+	setkey("input", KEY_END, '', 0);
+
+	setkey("nav", KEY_HELP, '?', KEY_F(1), 0); // help
+	setkey("nav", KEY_DC, 'd', KEY_F(8), 0);	// delete
+	setkey("nav", 'v', KEY_F(3), 0); // view
+	setkey("nav", 'e', KEY_F(4), 0); // edit
+	setkey("nav", 'n', 0);	// new
+	setkey("nav", 'a', 0);	// add
+	setkey("nav", KEY_MARK, 't', KEY_IC, 0);	// tag/untag
+	setkey("nav", 'u', KEY_F(9), 0);	// untag all
+	setkey("nav", 'r', KEY_F(6), 0);	// rename
+	setkey("nav", KEY_FIND, '/', KEY_F(7), 0); // search
+	setkey("nav", 'c', 0); // change section (move-to)
+	setkey("nav", 's', 0);	// select section (filter)
+	setkey("nav", 'm', KEY_F(2), 0);	// user-defined menu
+	setkey("nav", '!', KEY_F(10), 0);	// execute
+//	setkey("nav", 'f', 0);	// set filter test
+	setkey("nav", 'f', 0);	// file manager
 	}
 
 // returns the last defined KEY_PRG code of the 'key'
-int	getkprg(int key) {
+int	getkprg(int key, const char *smap) {
 	list_node_t *cur = keymap->head;
 	keymap_t	*map;
 	int			cid = KEY_PRG(key);
 	
 	while ( cur ) {
 		map = (keymap_t *) cur->data;
-		if ( map->key == key )
+		if ( map->key == key && strcmp(map->map, smap) == 0 )
 			cid = map->id;	// get the last defined
 		cur = (list_node_t *) cur->next;
 		}
@@ -291,7 +305,7 @@ int getkcode(const char *name) {
 void keymap_add(const char *pars) {
 	char	*src = strdup(pars), *p = src;
 	char	dest[64], *d = dest;
-	char	keycode[64], keycmd[64];
+	char	keycode[64], keycmd[64], kmap[64];
 	bool	sq = false, dq = false;
 	int		wc = 0, c;
 	keymap_t k;
@@ -342,8 +356,10 @@ void keymap_add(const char *pars) {
 					while ( isblank(*p) )	p ++;
 					wc ++;
 					if ( wc == 1 )
+						strcpy(kmap, dest);
+					else if ( wc == 2 )
 						strcpy(keycode, dest);
-					if ( wc == 2 ) {
+					else if ( wc == 3 ) {
 						strcpy(keycmd, dest);
 						break;
 						}
@@ -352,22 +368,40 @@ void keymap_add(const char *pars) {
 			}
 		*d ++ = *p ++;
 		}
-	if ( d != dest && wc == 1 ) {
+	if ( d != dest && wc == 2 ) {
 		*d = '\0';
 		strcpy(keycmd, dest);
 		wc ++;
 		}
-	// TODO: if wc == 1 delete last node of the keycode
-	// TODO: if wc == 2 assign keycode to keycmd
 
-	// convert keynames from C-X or ^X to CTRL, A-X or M-X to ALT, S-X to shift,
-	// S-C-A combinations are allowed but not by ncurses (man curs_getch)
-	k.key = getkcode(keycode);
-	for ( int i = 0; keyfunc[i].keyword; i ++ ) {
-		if ( strcasecmp(keyfunc[i].keyword, keycmd) == 0 ) {
-			k.id = keyfunc[i].id;
-			list_add(keymap, &k, sizeof(keymap_t));
-			break;
+	if ( wc > 1 ) {
+		// convert keynames from C-X or ^X to CTRL, A-X or M-X to ALT, S-X to shift,
+		// S-C-A combinations are allowed but not by ncurses (man curs_getch)
+		k.key = getkcode(keycode);
+		strcpy(k.map, kmap);
+		
+		// if wc == 2 delete nodes of the keycode
+		if ( wc == 2 ) {
+			list_node_t	*cur = keymap->head, *next;
+			keymap_t	*this_k;
+			while ( cur ) {
+				this_k = (keymap_t *) cur->data;
+				next = (list_node_t *) cur->next;
+				if ( this_k->key == k.key && strcmp(this_k->map, k.map) == 0 )
+					list_delete(keymap, cur); // delete this
+				cur = next;
+				}
+			}
+
+		// if wc == 3 assign keycode to keycmd
+		if ( wc == 3 ) {
+			for ( int i = 0; keyfunc[i].keyword; i ++ ) {
+				if ( strcasecmp(keyfunc[i].keyword, keycmd) == 0 ) {
+					k.id = keyfunc[i].id;
+					list_add(keymap, &k, sizeof(keymap_t));
+					break;
+					}
+				}
 			}
 		}
 	free(src);
@@ -965,7 +999,7 @@ v, F3  ... View. Display the current or the tagged notes[1] with $PAGER.\n\
 e, F4  ... Edit. Edit the current or the tagged notes[1] with the $EDITOR.\n\
 r  F6  ... Rename. Renames the current note.\n\
 d, DEL ... Delete. Deletes the current or the tagged notes[1].\n\
-n, ^N  ... New. Invokes the $EDITOR with a new file; you will have to save it.\n\
+n      ... New. Invokes the $EDITOR with a new file; you will have to save it.\n\
 a      ... Add. Creates a new empty note.\n\
 s      ... Select Section.\n\
 c      ... Change section. Changes the section of the current or the tagged notes[1].\n\
@@ -974,7 +1008,7 @@ u, F9  ... Untag all.\n\
 /, F7  ... Search[2].\n\
 m, F2  ... Menu. Open the user-defined menu.\n\
 !, x, F10  Execute something with current/tagged notes[1].\n\
-F11    ... Open the notes directory with the file manager.\n\
+f      ... Open the notes directory with the file manager.\n\
 F5     ... Rebuild & redraw the list.\n\
 \n\
 Notes:\n\
@@ -1125,7 +1159,7 @@ int ex_tagged_shell(const char *cmd, list_t *tagged) {
 // TUI
 void explorer() {
 	bool	exitf = false;
-	int		ch, offset = 0, pos = 0;
+	int		ch, pf, offset = 0, pos = 0;
 	int		lines, keep_status = 0;
 	char	buf[LINE_MAX];
 	char	prompt[LINE_MAX];
@@ -1153,6 +1187,7 @@ void explorer() {
 		}
 	
 	raw();
+	set_default_keymap();
 	ex_build_windows();
 	ex_colorize(ex_help, ex_help_s);
 	
@@ -1185,74 +1220,21 @@ void explorer() {
 		// read key
 		ch = wgetch(w_inf);
 
-		// navigation keys
-		if ( mode == ex_nav ) {
-			switch ( ch ) {
-			case 'q': ch = KEY_EXIT; break;
-			case '': ch = KEY_EXIT; break;
-			case '': ch = KEY_EXIT; break;
-			case 'k': ch = KEY_UP; break;
-			case 'j': ch = KEY_DOWN; break;
-			case 'h': ch = KEY_LEFT; break;
-			case 'l': ch = KEY_RIGHT; break;
-			case 'g': ch = KEY_HOME; break;
-			case 'G': ch = KEY_END; break;
-			case 't': ch = KEY_MARK; break;	// tag
-			case KEY_IC: ch = KEY_MARK; break;	// tag
-			case 'd': ch = KEY_SDC; break;	// delete
-			case '?': ch = KEY_HELP; break;	// help
-			case 'm': ch = KEY_F(2); break;	// user menu
-			case 'v': ch = KEY_F(3); break;	// view
-			case 'e': ch = KEY_F(4); break;	// edit
-			// F5 = refresh
-			case 'r': ch = KEY_F(6); break;	// rename
-			case '/': ch = KEY_FIND; break;	// search
-//			case 'f': ch = KEY_F(8); break;	// filter
-			case 'u': ch = KEY_F(9); break;	// untag all
-			case '!': ch = KEY_F(10); break; // execute command
-			case 'x': ch = KEY_F(10); break; // execute command
-			case 's': ch = KEY_F(25); break; // select section
-			case 'c': ch = KEY_F(26); break; // change section
-			case 'n': ch = KEY_CREATE; break; // new note (invoke editor)
-			case 'a': ch = '\001'; break; // add note 
-				}
-			}
-
-		// input string keys
+		// input string mode
 		if ( mode == ex_search ) {
-			switch ( ch ) {
-			case '': ch = KEY_CLOSE; break;
-			case '': ch = KEY_CLOSE; break;
+			pf = getkprg(ch, "input");
+			wchar_t wch = (wchar_t) ch;
+			if ( u8ischar(ch) ) {
+				char mbs[5];
+				int keylen = u8csize(ch);
+				mbs[0] = ch;
+				for ( i = 1; i < keylen; i ++ )
+					mbs[i] = wgetch(w_inf);
+				mbs[keylen] = '\0';
+				wch = u8towc(mbs);
 				}
-			}
-		
-		// common special keys
-		switch ( ch ) {
-		case KEY_F(1): ch = KEY_HELP;  break;	// help
-		case KEY_F(3): ch = KEY_PRINT;  break;	// view
-		case KEY_F(4): ch = KEY_OPEN;  break;	// edit
-		case KEY_F(7): ch = KEY_FIND;  break;	// search
-		case KEY_F(5): ch = KEY_REFRESH; break;
-		case '\n':     ch = KEY_ENTER; break;
-		case '\r':     ch = KEY_ENTER; break;
-		case '':     ch = KEY_REFRESH; break;
-		case 8:        ch = KEY_BACKSPACE; break;
-		case 127:      ch = KEY_BACKSPACE; break;
-			}
-		
-		switch ( ch ) {
-		case KEY_RESIZE:
-		case KEY_REFRESH:
-			ex_build_windows();
-			mvvline(0, getmaxx(stdscr) / 3, ' ', getmaxy(stdscr) - 1);
-			maxlen = getmaxx(w_inf) - INF_PREFIX;
-			break;
-		case KEY_EXIT:
-			exitf = true;
-			break;
-		case KEY_CLOSE:
-		case 27:	// single ESC
-			if ( mode == ex_search ) {
+			switch ( KPRG_KEY(pf) ) {
+			case KEY_CANCEL:
 				search[0] = '\0';
 				wsearch[0] = L'\0';
 				spos = 0;
@@ -1260,382 +1242,372 @@ void explorer() {
 				curs_set(0);
 				strcpy(current_filter, "");
 				ex_rebuild();
-				}
-			break;
-		case KEY_HELP:
-			nc_view("Help", ex_help_long);
-			ex_refresh();
-			break;
-		case KEY_UP:
-			if ( t_notes_count )
-				{ if ( pos ) pos --; }
-			else
-				offset = pos = 0;
-			break;
-		case KEY_DOWN:
-			if ( t_notes_count )
-				{ if ( pos < t_notes_count - 1 ) pos ++; }
-			else
-				offset = pos = 0;
-			break;
-		case KEY_HOME:
-			if ( mode == ex_search )
-				goto common_key;
-			offset = pos = 0;
-			break;
-		case KEY_END:
-			if ( mode == ex_search )
-				goto common_key;
-			if ( t_notes_count )
-				pos = t_notes_count - 1;
-			break;
-		case KEY_PPAGE:
-		case KEY_NPAGE:
-			if ( t_notes_count ) {
-				int dir = (ch == KEY_NPAGE) ? 1 : -1;
-				pos += lines * dir;
-				offset += lines * dir;
-				if ( pos >= t_notes_count )
-					offset = pos = t_notes_count - 1;
-				if ( pos < 0 )
-					offset = pos = 0;
-				}
-			break;
-		case KEY_ENTER:	// enter -> view current note
-			if ( mode == ex_search ) {
+				continue;
+			case KEY_ENTER:	// enter -> view current note
 				mode = ex_nav;
 				sprintf(current_filter, "*%s*", search);
 				curs_set(0);
 				ex_rebuild();
 				ex_refresh();
-				}
-			else if ( t_notes_count ) {
-				ex_presh();
-				rule_exec('v', t_notes[pos]->file);
-				ex_refresh();
-				}
-			break;
-		case KEY_F(9): // untag all
-			list_clear(tagged);
-			sprintf(status, "untag all.");
-			ex_refresh();
-			break;
-		case KEY_MARK: // tag/untag
-			if ( t_notes_count ) {
-				list_node_t *node = list_findptr(tagged, t_notes[pos]);
-				if ( node )
-					list_delete(tagged, node);
-				else {
-					list_addptr(tagged, t_notes[pos]);
-					ungetch(KEY_DOWN);
+				continue;
+			case KEY_LEFT:	if ( spos ) spos --; break;
+			case KEY_RIGHT:	if ( search[spos] ) spos ++; break;
+			case KEY_HOME:	spos = 0; break;
+			case KEY_END:	spos = slen; break;
+			case KEY_BACKSPACE:
+				if ( spos ) {
+					spos --; slen --;
+					for ( i = spos; wsearch[i]; i ++ )
+						wsearch[i] = wsearch[i+1];
+					wsearch[slen] = '\0';
+					}
+				break;
+			case KEY_DC:
+				if ( wsearch[spos] ) {
+					for ( i = spos; wsearch[i]; i ++ )
+						wsearch[i] = wsearch[i+1];
+					slen --;
+					}
+				break;
+			case KEY_IC:	
+				insert = !insert;
+				curs_set((insert)?1:2);
+				break;
+			default:
+				if ( slen < maxlen ) {
+					if ( insert ) {
+						for ( i = slen; i >= spos; i -- )
+							wsearch[i+1] = wsearch[i];
+						wsearch[spos] = wch;
+						wsearch[++ slen] = '\0';
+						}
+					else {
+						wsearch[spos] = wch;
+						if ( spos == slen )
+							wsearch[++ slen] = '\0';
+						}
+					spos ++;
 					}
 				}
-			break;
-		case KEY_PRINT: // view in pager
-			if ( t_notes_count ) {
-				ex_presh();
-				if ( list_count(tagged) )
-					ex_tagged_shell("$PAGER %f", tagged);
-				else
-					rule_exec('v', t_notes[pos]->file);
-				ex_refresh();
-				}
-			break;
-//		case KEY_F(8): // filter
-//			strcpy(buf, current_filter);
-//			if ( ex_input(buf, "Set filter (current filter: '%s')", current_filter) ) {
-//				strcpy(current_filter, buf);
-//				ex_rebuild();
-//				offset = pos = 0;
-//				}
-//			ex_refresh();
-//			break;
-		case KEY_FIND: // search
-			search[0] = '\0';
-			wsearch[0] = L'\0';
-			spos = slen = 0;
-			mode = ex_search;
-			curs_set(1);
-			break;
-		case KEY_OPEN: // edit
-			if ( t_notes_count ) {
-				ex_presh();
-				if ( list_count(tagged) )
-					ex_tagged_shell("$EDITOR %f", tagged);
-				else
-					rule_exec('e', t_notes[pos]->file);
-				ex_refresh();
-				}
-			break;
-		case KEY_F(25): // select current section
-			if ( ex_select_section(current_section, current_section) )
-				ex_rebuild();
-			ex_refresh();
-			break;
-		case KEY_F(26): // change section
-			if ( t_notes_count ) {
-				strcpy(buf, "");
-				if ( ex_input(buf, "Enter the new section (enter ? for listbox)") && strlen(buf) ) {
-					char *new_section = NULL, *p;
-					if ( strchr(buf, '?') != NULL ) {
-						if ( ex_select_section(buf, NULL) )
-							new_section = strdup(buf);
-						}
-					else
-						new_section = strdup(buf);
-					
-					// check file-name
-					if ( new_section ) {
-						bool err = false;
-						if ( strcmp(new_section,  ".") == 0 ) err = true;
-						if ( strcmp(new_section, "..") == 0 ) err = true;
-						for ( p = new_section; *p; p ++ ) {
-							if ( strchr("/?*\\<>|", *p) != NULL ) {
-								sprintf(status, "Illegal character (%c)", *p);
-								err = true;
-								break;
-								}
-							}
-						if ( err ) {
-							free(new_section);
-							new_section = NULL;
-							}
-						}
-					
-					if ( new_section ) { // name its ok, continue
-						normalize_section_name(new_section);
-						make_section(new_section);
-							
-						// add the current element to tagged list
-						if ( !list_count(tagged) )
-							list_addptr(tagged, t_notes[pos]);
-						
-						// move files
-						int succ = 0, fail = 0;
-						for ( list_node_t *cur = tagged->head; cur; cur = (list_node_t *) cur->next ) {
-							note_t *cn = (note_t *) cur->data;
-							note_backup(cn);
-							note_t *nn = make_note(cn->name, new_section, 0);
-							if ( rename(cn->file, nn->file) != 0 ) {
-								sprintf(status, "move failed");
-								fail ++;
-								}
-							else
-								succ ++;
-							free(nn);
-							}
-
-						// report
-						if ( succ == 1 ) sprintf(status, "one note moved%c", ((fail)?';':'.'));
-						else sprintf(status, "%d notes moved%c", succ, ((fail)?';':'.'));
-						if ( fail ) sprintf(status+strlen(status), " %d failed.", fail);
-
-						// cleanup
-						list_clear(tagged);
-						free(new_section);
-						}
-					}
-				
-				ex_rebuild();
-				ex_refresh();
-				}
-			break;
-/*
-		case KEY_REFRESH:
+			
+			// rebuild everything
+			u8cpytostr(search, wsearch);
+			sprintf(current_filter, "*%s*", search);
 			ex_rebuild();
-			sprintf(status, "rebuilded.");
-			ex_refresh();
-			break;
-*/
-		case KEY_F(11): // show in filemanager
-			{
-			char *fmans[] = { "xdg-open", "mc", "thunar", "dolphin", NULL };
-			int idx = nc_listbox("File Manager", (const char **) fmans, 0);
-			if ( idx > -1 ) {
-				ex_presh();
-				sprintf(buf, "%s '%s'", fmans[idx], ndir);
-				system(buf);
-				}
-			ex_refresh();
-			break;
 			}
-		case KEY_DC: // delete
-			if ( mode == ex_search )
-				goto common_key;
-			if ( t_notes_count ) {
-				strcpy(buf, "");
-				if ( list_count(tagged) )
-					sprintf(prompt, "Delete all tagged notes ?");
+
+		// navigation mode
+		else if ( mode == ex_nav ) {
+			pf = getkprg(ch, "nav");
+//			fprintf(stderr, "%04X %04X %d\n", pf, ch, ch);
+			switch ( KPRG_KEY(pf) ) {
+			case KEY_RESIZE:
+			case KEY_REFRESH:
+				ex_build_windows();
+				mvvline(0, getmaxx(stdscr) / 3, ' ', getmaxy(stdscr) - 1);
+				maxlen = getmaxx(w_inf) - INF_PREFIX;
+				break;
+			case KEY_EXIT:
+				exitf = true;
+				break;
+			case KEY_HELP:
+				nc_view("Help", ex_help_long);
+				ex_refresh();
+				break;
+			case KEY_UP:
+				if ( t_notes_count )
+					{ if ( pos ) pos --; }
 				else
-					sprintf(prompt, "Do you want to delete '%s' ?", t_notes[pos]->name);
-				
-				if ( ex_input(buf, "%s", prompt) && istrue(buf) ) {
-					if ( !list_count(tagged) )
-						list_addptr(tagged, t_notes[pos]);
-					int succ = 0, fail = 0;
-					for ( list_node_t *cur = tagged->head; cur; cur = (list_node_t *) cur->next )
-						(note_delete(cur->data)) ? succ ++ : fail ++;
-					if ( succ == 1 ) sprintf(status, "one note deleted%c", ((fail)?';':'.'));
-					else sprintf(status, "%d notes deleted%c", succ, ((fail)?';':'.'));
-					if ( fail ) sprintf(status+strlen(status), " %d failed.", fail);
-					
-					list_clear(tagged);
-					ex_rebuild();
-					if ( t_notes_count ) {
-						if ( pos >= t_notes_count )
-							pos = t_notes_count - 1;
-						}
-					else
+					offset = pos = 0;
+				break;
+			case KEY_DOWN:
+				if ( t_notes_count )
+					{ if ( pos < t_notes_count - 1 ) pos ++; }
+				else
+					offset = pos = 0;
+				break;
+			case KEY_HOME:
+				offset = pos = 0;
+				break;
+			case KEY_END:
+				if ( t_notes_count )
+					pos = t_notes_count - 1;
+				break;
+			case KEY_PGUP:
+			case KEY_PGDN:
+				if ( t_notes_count ) {
+					int dir = (pf == KEY_PRG(KEY_PGDN)) ? 1 : -1;
+					pos += lines * dir;
+					offset += lines * dir;
+					if ( pos >= t_notes_count )
+						offset = pos = t_notes_count - 1;
+					if ( pos < 0 )
 						offset = pos = 0;
 					}
+				break;
+			case KEY_ENTER:	// enter -> view current note
+				if ( t_notes_count ) {
+					ex_presh();
+					rule_exec('v', t_notes[pos]->file);
+					ex_refresh();
+					}
+				break;
+			case 'u': // untag all
+				list_clear(tagged);
+				sprintf(status, "untag all.");
 				ex_refresh();
-				}
-			break;
-		case KEY_BACKSPACE:
-			if ( mode == ex_search )
-				goto common_key;
-			break;
-		case KEY_F(6):	// rename
-			if ( t_notes_count ) {
-				strcpy(buf, t_notes[pos]->name);
-				if ( ex_input(buf, "Enter the new name ([section/]new-name[.extension])", t_notes[pos]->name)
-						&& strlen(buf)
-						&& strcmp(buf, t_notes[pos]->name) != 0 ) {
-					note_backup(t_notes[pos]);
-					note_t *nn = make_note(buf, t_notes[pos]->section, 1);
-					if ( !copy_file(t_notes[pos]->file, nn->file) )
-						sprintf(status, "copy failed");
+				break;
+			case KEY_MARK: // tag/untag
+				if ( t_notes_count ) {
+					list_node_t *node = list_findptr(tagged, t_notes[pos]);
+					if ( node )
+						list_delete(tagged, node);
 					else {
-						if ( remove(t_notes[pos]->file) != 0 )
-							sprintf(status, "delete old note failed");
-						}
-					free(nn);
-					ex_rebuild();
-					if ( (pos = ex_find(buf)) == -1 ) pos = 0;
-					}
-				ex_refresh();
-				}
-			break;
-		case KEY_F(2):
-			if ( t_notes_count && umenu->head ) {
-				int idx;
-				umenu_item_t **opts;
-				
-				opts = (umenu_item_t **) list_to_table(umenu);
-				if ( (idx = nc_listbox("User Menu", (const char **) opts, 0)) > -1 ) {
-					int tcnt = list_count(tagged);
-					if ( !tcnt )
 						list_addptr(tagged, t_notes[pos]);
+						ungetch(KEY_DOWN);
+						}
+					}
+				break;
+			case 'v': // view in pager
+				if ( t_notes_count ) {
+					ex_presh();
+					if ( list_count(tagged) )
+						ex_tagged_shell("$PAGER %f", tagged);
+					else
+						rule_exec('v', t_notes[pos]->file);
+					ex_refresh();
+					}
+				break;
+	//		case KEY_F(8): // filter
+	//			strcpy(buf, current_filter);
+	//			if ( ex_input(buf, "Set filter (current filter: '%s')", current_filter) ) {
+	//				strcpy(current_filter, buf);
+	//				ex_rebuild();
+	//				offset = pos = 0;
+	//				}
+	//			ex_refresh();
+	//			break;
+			case KEY_FIND: // search
+				search[0] = '\0';
+				wsearch[0] = L'\0';
+				spos = slen = 0;
+				mode = ex_search;
+				curs_set(1);
+				break;
+			case 'e': // edit
+				if ( t_notes_count ) {
+					ex_presh();
+					if ( list_count(tagged) )
+						ex_tagged_shell("$EDITOR %f", tagged);
+					else
+						rule_exec('e', t_notes[pos]->file);
+					ex_refresh();
+					}
+				break;
+			case 's': // select current section
+				if ( ex_select_section(current_section, current_section) )
+					ex_rebuild();
+				ex_refresh();
+				break;
+			case 'c': // change section
+				if ( t_notes_count ) {
+					strcpy(buf, "");
+					if ( ex_input(buf, "Enter the new section (enter ? for listbox)") && strlen(buf) ) {
+						char *new_section = NULL, *p;
+						if ( strchr(buf, '?') != NULL ) {
+							if ( ex_select_section(buf, NULL) )
+								new_section = strdup(buf);
+							}
+						else
+							new_section = strdup(buf);
+						
+						// check file-name
+						if ( new_section ) {
+							bool err = false;
+							if ( strcmp(new_section,  ".") == 0 ) err = true;
+							if ( strcmp(new_section, "..") == 0 ) err = true;
+							for ( p = new_section; *p; p ++ ) {
+								if ( strchr("/?*\\<>|", *p) != NULL ) {
+									sprintf(status, "Illegal character (%c)", *p);
+									err = true;
+									break;
+									}
+								}
+							if ( err ) {
+								free(new_section);
+								new_section = NULL;
+								}
+							}
+						
+						if ( new_section ) { // name its ok, continue
+							normalize_section_name(new_section);
+							make_section(new_section);
+								
+							// add the current element to tagged list
+							if ( !list_count(tagged) )
+								list_addptr(tagged, t_notes[pos]);
+							
+							// move files
+							int succ = 0, fail = 0;
+							for ( list_node_t *cur = tagged->head; cur; cur = (list_node_t *) cur->next ) {
+								note_t *cn = (note_t *) cur->data;
+								note_backup(cn);
+								note_t *nn = make_note(cn->name, new_section, 0);
+								if ( rename(cn->file, nn->file) != 0 ) {
+									sprintf(status, "move failed");
+									fail ++;
+									}
+								else
+									succ ++;
+								free(nn);
+								}
+
+							// report
+							if ( succ == 1 ) sprintf(status, "one note moved%c", ((fail)?';':'.'));
+							else sprintf(status, "%d notes moved%c", succ, ((fail)?';':'.'));
+							if ( fail ) sprintf(status+strlen(status), " %d failed.", fail);
+
+							// cleanup
+							list_clear(tagged);
+							free(new_section);
+							}
+						}
 					
-					ex_presh();
-					ex_tagged_shell(opts[idx]->cmd, tagged);
-					printf("\nPress any key to return...\n");
-					getch();
-					if ( !tcnt )
-						list_clear(tagged);
-					}
-				free(opts);
-				ex_refresh();
-				}
-			break;
-		case KEY_COMMAND:
-			if ( t_notes_count ) {
-				char	cmd[LINE_MAX];
-				strcpy(cmd, "");
-				if ( ex_input(cmd, "Enter command (use '%%f' for files)") && strlen(cmd) ) {
-					int tcnt = list_count(tagged);
-					if ( !tcnt )
-						list_addptr(tagged, t_notes[pos]);
-					ex_presh();
-					ex_tagged_shell(cmd, tagged);
-					printf("\nPress any key to return...\n");
-					getch();
-					if ( !tcnt )
-						list_clear(tagged);
-					}
-				ex_refresh();
-				}
-			break;
-		case '\001':
-		case KEY_CREATE:
-			strcpy(buf, "");
-			if ( ex_input(buf, "Enter new name ([section/]new-name[.extension])") && strlen(buf) ) {
-				note_t *note = make_note(buf, current_section, (ch == KEY_CREATE) ? 0 : 1);
-				if ( note ) {
-					sprintf(status, "'%s' created", note->name);
 					ex_rebuild();
-					if ( (pos = ex_find(note->name)) == -1 ) pos = 0;
-					if ( ch == KEY_CREATE ) { // 'new' key invokes the editor, 'add' key do not
-						ex_presh();
-						rule_exec('e', note->file);
-						}
-					free(note);
+					ex_refresh();
 					}
-				else
-					sprintf(status, "failed: errno (%d) %s", errno, strerror(errno));
-				}
-			ex_refresh();
-			break;
-		default:
-common_key:
-			if ( mode == ex_search ) {
-				wchar_t wch = (wchar_t) ch;
-				if ( u8ischar(ch) ) {
-					char mbs[5];
-					int keylen = u8csize(ch);
-					mbs[0] = ch;
-					for ( i = 1; i < keylen; i ++ )
-						mbs[i] = wgetch(w_inf);
-					mbs[keylen] = '\0';
-					wch = u8towc(mbs);
-					}
-				switch ( ch ) {
-				case KEY_LEFT:	if ( spos ) spos --; break;
-				case KEY_RIGHT:	if ( search[spos] ) spos ++; break;
-				case KEY_HOME:	spos = 0; break;
-				case KEY_END:	spos = slen; break;
-				case KEY_BACKSPACE:
-					if ( spos ) {
-						spos --; slen --;
-						for ( i = spos; wsearch[i]; i ++ )
-							wsearch[i] = wsearch[i+1];
-						wsearch[slen] = '\0';
-						}
-					break;
-				case KEY_DC:
-					if ( wsearch[spos] ) {
-						for ( i = spos; wsearch[i]; i ++ )
-							wsearch[i] = wsearch[i+1];
-						slen --;
-						}
-					break;
-				case KEY_IC:	
-					insert = !insert;
-					curs_set((insert)?1:2);
-					break;
-				default:
-					if ( slen < maxlen ) {
-						if ( insert ) {
-							for ( i = slen; i >= spos; i -- )
-								wsearch[i+1] = wsearch[i];
-							wsearch[spos] = wch;
-							wsearch[++ slen] = '\0';
-							}
-						else {
-							wsearch[spos] = wch;
-							if ( spos == slen )
-								wsearch[++ slen] = '\0';
-							}
-						spos ++;
-						}
-					}
-				
-				// rebuild everything
-				u8cpytostr(search, wsearch);
-				sprintf(current_filter, "*%s*", search);
+				break;
+	/*
+			case KEY_REFRESH:
 				ex_rebuild();
+				sprintf(status, "rebuilded.");
+				ex_refresh();
+				break;
+	*/
+			case 'f': // show in filemanager
+				{
+				char *fmans[] = { "xdg-open", "mc", "thunar", "dolphin", NULL };
+				int idx = nc_listbox("File Manager", (const char **) fmans, 0);
+				if ( idx > -1 ) {
+					ex_presh();
+					sprintf(buf, "%s '%s'", fmans[idx], ndir);
+					system(buf);
+					}
+				ex_refresh();
+				break;
 				}
-			break;
+			case KEY_DC: // delete
+				if ( t_notes_count ) {
+					strcpy(buf, "");
+					if ( list_count(tagged) )
+						sprintf(prompt, "Delete all tagged notes ?");
+					else
+						sprintf(prompt, "Do you want to delete '%s' ?", t_notes[pos]->name);
+					
+					if ( ex_input(buf, "%s", prompt) && istrue(buf) ) {
+						if ( !list_count(tagged) )
+							list_addptr(tagged, t_notes[pos]);
+						int succ = 0, fail = 0;
+						for ( list_node_t *cur = tagged->head; cur; cur = (list_node_t *) cur->next )
+							(note_delete(cur->data)) ? succ ++ : fail ++;
+						if ( succ == 1 ) sprintf(status, "one note deleted%c", ((fail)?';':'.'));
+						else sprintf(status, "%d notes deleted%c", succ, ((fail)?';':'.'));
+						if ( fail ) sprintf(status+strlen(status), " %d failed.", fail);
+						
+						list_clear(tagged);
+						ex_rebuild();
+						if ( t_notes_count ) {
+							if ( pos >= t_notes_count )
+								pos = t_notes_count - 1;
+							}
+						else
+							offset = pos = 0;
+						}
+					ex_refresh();
+					}
+				break;
+			case 'r':	// rename
+				if ( t_notes_count ) {
+					strcpy(buf, t_notes[pos]->name);
+					if ( ex_input(buf, "Enter the new name ([section/]new-name[.extension])", t_notes[pos]->name)
+							&& strlen(buf)
+							&& strcmp(buf, t_notes[pos]->name) != 0 ) {
+						note_backup(t_notes[pos]);
+						note_t *nn = make_note(buf, t_notes[pos]->section, 1);
+						if ( !copy_file(t_notes[pos]->file, nn->file) )
+							sprintf(status, "copy failed");
+						else {
+							if ( remove(t_notes[pos]->file) != 0 )
+								sprintf(status, "delete old note failed");
+							}
+						free(nn);
+						ex_rebuild();
+						if ( (pos = ex_find(buf)) == -1 ) pos = 0;
+						}
+					ex_refresh();
+					}
+				break;
+			case 'm':
+				if ( t_notes_count && umenu->head ) {
+					int idx;
+					umenu_item_t **opts;
+					
+					opts = (umenu_item_t **) list_to_table(umenu);
+					if ( (idx = nc_listbox("User Menu", (const char **) opts, 0)) > -1 ) {
+						int tcnt = list_count(tagged);
+						if ( !tcnt )
+							list_addptr(tagged, t_notes[pos]);
+						
+						ex_presh();
+						ex_tagged_shell(opts[idx]->cmd, tagged);
+						printf("\nPress any key to return...\n");
+						getch();
+						if ( !tcnt )
+							list_clear(tagged);
+						}
+					free(opts);
+					ex_refresh();
+					}
+				break;
+			case '!':
+				if ( t_notes_count ) {
+					char	cmd[LINE_MAX];
+					strcpy(cmd, "");
+					if ( ex_input(cmd, "Enter command (use '%%f' for files)") && strlen(cmd) ) {
+						int tcnt = list_count(tagged);
+						if ( !tcnt )
+							list_addptr(tagged, t_notes[pos]);
+						ex_presh();
+						ex_tagged_shell(cmd, tagged);
+						printf("\nPress any key to return...\n");
+						getch();
+						if ( !tcnt )
+							list_clear(tagged);
+						}
+					ex_refresh();
+					}
+				break;
+			case 'a':
+			case 'n':
+				strcpy(buf, "");
+				if ( ex_input(buf, "Enter new name ([section/]new-name[.extension])") && strlen(buf) ) {
+					note_t *note = make_note(buf, current_section, (ch == KEY_CREATE) ? 0 : 1);
+					if ( note ) {
+						sprintf(status, "'%s' created", note->name);
+						ex_rebuild();
+						if ( (pos = ex_find(note->name)) == -1 ) pos = 0;
+						if ( ch == 'n' ) { // 'new' key invokes the editor, 'add' key do not
+							ex_presh();
+							rule_exec('e', note->file);
+							}
+						free(note);
+						}
+					else
+						sprintf(status, "failed: errno (%d) %s", errno, strerror(errno));
+					}
+				ex_refresh();
+				break;
+				}
 			}
 		} while ( !exitf );
 	nc_close();
