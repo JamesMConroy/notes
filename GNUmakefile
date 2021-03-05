@@ -8,6 +8,7 @@ MANDIR1 := /usr/local/share/man/man1
 MANDIR5 := /usr/local/share/man/man5
 CFLAGS  := -Os -Wall -Wformat=0 -D_GNU_SOURCE
 LDLIBS  := -lncurses
+M2RFLAGS := -z -q
 
 all: $(APPNAME)
 
@@ -19,24 +20,26 @@ $(APPMODS): %.o: %.c
 $(APPNAME): $(ADDMODS)
 
 $(APPNAME).man: $(APPNAME).md
-	md2roff $(APPNAME).md > $(APPNAME).man
+	md2roff $(M2RFLAGS) $(APPNAME).md > $(APPNAME).man
 
 $(APPNAME).1.gz: $(APPNAME).md
-	md2roff -z $(APPNAME).md > $(APPNAME).1
+	md2roff $(M2RFLAGS) $(APPNAME).md > $(APPNAME).1
 	gzip -f $(APPNAME).1
 
 $(APPNAME)rc.man: $(APPNAME)rc.md
-	md2roff $(APPNAME)rc.md > $(APPNAME)rc.man
+	md2roff $(M2RFLAGS) $(APPNAME)rc.md > $(APPNAME)rc.man
 
 $(APPNAME)rc.5.gz: $(APPNAME)rc.md
-	md2roff -z $(APPNAME)rc.md > $(APPNAME)rc.5
+	md2roff $(M2RFLAGS) $(APPNAME)rc.md > $(APPNAME)rc.5
 	gzip -f $(APPNAME)rc.5
 
 html: $(APPNAME).man
+	md2roff -q $(APPNAME).md > $(APPNAME).man
 	groff $(APPNAME).man -Thtml -man > $(APPNAME).html
 
-pdf: notes.man
-	groff $(APPNAME).man -Tpdf -man -P -e > $(APPNAME).pdf
+pdf: $(APPNAME).md
+	md2roff -q $(APPNAME).md > $(APPNAME).man
+	groff $(APPNAME).man -Tpdf -man > $(APPNAME).pdf
 
 install: $(APPNAME) $(APPNAME).1.gz $(APPNAME)rc.5.gz
 	sudo install -m 755 -o root -g root -s $(APPNAME) $(INSTALL)
