@@ -21,15 +21,15 @@ $(APPNAME): $(ADDMODS)
 $(APPNAME).man: $(APPNAME).md
 	md2roff $(APPNAME).md > $(APPNAME).man
 
-$(APPNAME).1.gz: $(APPNAME).man
-	cp $(APPNAME).man $(APPNAME).1
+$(APPNAME).1.gz: $(APPNAME).md
+	md2roff -z $(APPNAME).md > $(APPNAME).1
 	gzip -f $(APPNAME).1
 
 $(APPNAME)rc.man: $(APPNAME)rc.md
 	md2roff $(APPNAME)rc.md > $(APPNAME)rc.man
 
-$(APPNAME)rc.5.gz: $(APPNAME)rc.man
-	cp $(APPNAME)rc.man $(APPNAME)rc.5
+$(APPNAME)rc.5.gz: $(APPNAME)rc.md
+	md2roff -z $(APPNAME)rc.md > $(APPNAME)rc.5
 	gzip -f $(APPNAME)rc.5
 
 html: $(APPNAME).man
