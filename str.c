@@ -19,7 +19,9 @@
  * 	Written by Nicholas Christopoulos <nereus@freemail.gr>
  */
 
-#define _XOPEN_SOURCE 700
+#ifndef _GNU_SOURCE
+	#define _XOPEN_SOURCE 700
+#endif
 #include <wchar.h>
 #include <assert.h>
 #include "str.h"

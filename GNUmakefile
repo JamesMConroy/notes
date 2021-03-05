@@ -6,7 +6,7 @@ ADDMODS := str.o nc-readstr.o nc-core.o nc-keyb.o nc-view.o nc-list.o notes.o li
 INSTALL := /usr/local/bin
 MANDIR1 := /usr/local/share/man/man1
 MANDIR5 := /usr/local/share/man/man5
-CFLAGS  := -Os -Wall -Wformat=0
+CFLAGS  := -Os -Wall -Wformat=0 -D_GNU_SOURCE
 LDLIBS  := -lncurses
 
 all: $(APPNAME)

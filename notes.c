@@ -38,7 +38,9 @@
 #include <ncurses.h>
 #include <locale.h>
 #include <time.h>
-#define _GNU_SOURCE
+#ifndef _GNU_SOURCE
+	#define _GNU_SOURCE
+#endif
 #include <fnmatch.h>
 
 #include "list.h"
