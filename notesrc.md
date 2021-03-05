@@ -1,4 +1,4 @@
-# notesrc 5 2021-01-22 NDC
+# notesrc 5 2021-01-22 "NDC Tools Collection"
 ## NAME
 notesrc - NDC's notes configuration file.
 
@@ -82,7 +82,19 @@ umenu copy to clipbard ; xclip -i %f
 ```
 
 #### map *map* *key* [*command*]
-Assign or remove a key.
+Assign or remove a key. If you don't specify the *command* parameter then
+removes the key from the *map*. There are two maps, the `nav` which works
+on browsing and the `input` which works on data input (string, menus and
+anything wants normal characters as data).
+
+There are some limitations of ncurses, for example, function keys cannot have
+modifier as Shift, Alt or Control.
+
+```
+map nav ^R rename
+map nav A-r rename
+map nav C-A-R rename
+```
 
 ## COPYRIGHT
 Copyright © 2020-2021 Nicholas Christopoulos.
