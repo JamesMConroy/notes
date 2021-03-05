@@ -1536,12 +1536,15 @@ void init() {
 		if ( access(conf, R_OK) != 0 )
 			sprintf(ndir, "%s/.notes", home);
 		}
-	if ( getenv("XDG_CONFIG_HOME") )
-		sprintf(conf, "%s/notes/notesrc", getenv("XDG_CONFIG_HOME"));
-	else
-		sprintf(conf, "%s/.config/notes/notesrc", home);
-	if ( access(conf, R_OK) != 0 )
-		sprintf(conf, "%s/.notesrc", home);
+
+	if ( strlen(conf) == 0 ) {
+		if ( getenv("XDG_CONFIG_HOME") )
+			sprintf(conf, "%s/notes/notesrc", getenv("XDG_CONFIG_HOME"));
+		else
+			sprintf(conf, "%s/.config/notes/notesrc", home);
+		if ( access(conf, R_OK) != 0 )
+			sprintf(conf, "%s/.notesrc", home);
+		}
 
 	// read config file
 	read_conf(conf);
@@ -1602,6 +1605,7 @@ Modes:\n\
     -e, --edit     load note[s] to $EDITOR (see --all)\n\
     -d, --delete   delete a note\n\
     -r, --rename   rename or move a note\n\
+    -c, --rcfile   use this config file\n\
 \n\
 Options:\n\
     -s, --section  define section\n\
@@ -1638,8 +1642,20 @@ int main(int argc, char *argv[]) {
 	note_t	*note;
 	list_node_t *cur_arg = NULL;
 	bool	sectionf = false;
+	char	tmp[LINE_MAX];
 
 	setlocale(LC_ALL, "");
+
+	// custom rcfile
+	strcpy(conf, "");
+	for ( i = 1; i < argc; i ++ ) {
+		if ( strcmp(argv[i], "-c") == 0 || strcmp(argv[i], "--rcfile") == 0 ) {
+			if ( i < argc - 1 )
+				strcpy(conf, argv[i+1]);
+			}
+		}
+	
+	//
 	init();
 	args = list_create();
 	for ( i = 1; i < argc; i ++ ) {
@@ -1663,11 +1679,13 @@ int main(int argc, char *argv[]) {
 				case 's': asw = current_section; sectionf = true; break;
 				case 'r': opt_flags = OPT_MOVE; break;
 				case 'd': opt_flags = OPT_DEL; break;
-				case '+': opt_flags |= OPT_APPD;
+				case '+': opt_flags |= OPT_APPD; break;
+				case 'c': break;
 				case 'h': puts(usage); return exit_code;
 //				case 'v': puts(verss); return exit_code;
 				case '-': // -- double minus
 					if ( strcmp(argv[i], "--all") == 0 )			{ opt_flags |= OPT_ALL; }
+					else if ( strcmp(argv[i], "--rcfile") == 0 )	{ asw = tmp; }
 					else if ( strcmp(argv[i], "--add") == 0 )		{ opt_flags = OPT_ADD; }
 					else if ( strcmp(argv[i], "--add!") == 0 )		{ opt_flags = OPT_ADD | OPT_NOCLOB; }
 					else if ( strcmp(argv[i], "--append") == 0 )	{ opt_flags = OPT_ADD | OPT_APPD; }

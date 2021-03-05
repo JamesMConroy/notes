@@ -16,6 +16,7 @@ SYNTAX:
 	-f pattern
 	-d[a] {name|pattern}
 	-r old-name new-name
+	-c rcfile
 	[pattern]
 
 ## DESCRIPTION
@@ -96,6 +97,10 @@ Do not use it as first option because it means `--add`.
 #### -h, --help
 Displays a short help text and exits.
 
+#### -c, --rcfile *file*
+Read this `file` for setting notes options, instead of reading
+the default user's notesrc file.
+
 #### --version
 Displays the program version, copyright and license information and exits.
 
@@ -129,10 +134,25 @@ If set, the default editor for notes.
 #### BACKUPDIR
 If set, the default backup directory.
 
+## FILES
+When `--rcfile` is given,
+`notes` will read the specified file for setting its options and key bindings.
+Without that option,
+`notes` will read the user's `notesrc` (if it exists), 
+either `$XDG_CONFIG_HOME/notes/notesrc` or `~/.config/notes/notesrc`
+or `~/.notesrc`, whichever is encountered first.
+See [notesrc 5](man)
+
+## HOMEPAGE
+<https://github.com/nereusx/notes>
+
+## REPORTING BUGS
+Report bugs to: <https://github.com/nereusx/notes/issues>
+
 ## COPYRIGHT
 Copyright © 2020-2021 Nicholas Christopoulos.
+License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>.
 
-License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
 This is free software: you are free to change and redistribute it.
 There is NO WARRANTY, to the extent permitted by law.
 
