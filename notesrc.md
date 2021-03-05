@@ -81,6 +81,9 @@ umenu print the contents ; cat %f
 umenu copy to clipbard ; xclip -i %f
 ```
 
+#### map *map* *key* [*command*]
+Assign or remove a key.
+
 ## COPYRIGHT
 Copyright © 2020-2021 Nicholas Christopoulos.
 
