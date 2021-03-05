@@ -19,8 +19,9 @@
  * 	Written by Nicholas Christopoulos <nereus@freemail.gr>
  */
 
+#define _XOPEN_SOURCE 700
+#include <wchar.h>
 #include <assert.h>
-#define _XOPEN_SOURCE
 #include "str.h"
 
 #ifndef MIN
@@ -119,12 +120,11 @@ size_t	u8strlen(const char *str) {
 
 // width in screen-columns of wcs
 size_t u8width(const char *str) {
-	// ? why wcswidth isnt defined?
-	//wchar_t *s = u8towcs(str);
-	//int	n = wcswidth(s, wcslen(s));
-	//free(s);
-	//return n;
-	return u8strlen(str);
+	wchar_t *s = u8towcs(str);
+	int	n = wcswidth(s, wcslen(s));
+	free(s);
+	return n;
+//	return u8strlen(str);
 	}
 
 // append source to string base
