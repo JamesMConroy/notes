@@ -8,7 +8,7 @@ MANDIR1 := /usr/local/share/man/man1
 MANDIR5 := /usr/local/share/man/man5
 CFLAGS  := -Os -Wall -Wformat=0 -D_GNU_SOURCE
 LDLIBS  := -lncurses
-M2RFLAGS := -z -q
+M2RFLAGS := -z
 
 all: $(APPNAME)
 

@@ -21,14 +21,14 @@ SYNTAX:
 
 ## DESCRIPTION
 The notes-files are stored in a user-defined directory with optional subdirectories.
-The subdirectories in the application are named *sections*.
+The subdirectories in the application are named **sections**.
 Normally this directory is `~/.notes` or `~/Nextcloud/Notes` if there is _Nextcloud_.
 It can be specified in the configuration file.
 The files can be plain text, markdown or anything else that can configured
 by the _rule_ command in the configuration file.
-If the _note_ is `-` then it reads from *stdin*.
+If the _note_ is `-` then it reads from **stdin**.
 
-Running program without arguments, enters in TUI mode (*ncurses* interface).
+Running program without arguments, enters in TUI mode (**ncurses** interface).
 
 The program was designed to behave as the `man` command.
 
@@ -46,7 +46,7 @@ The program was designed to behave as the `man` command.
 #### -a[!], --add[!]
 Creates a new note file. If file extension is not specified then the default will be used (see notesrc(5)).
 If additional files are specified in the command line, their contents will be inserted into the new note.
-Use it with `-e` to invoke the editor or `-` to get input from *stdin*.
+Use it with `-e` to invoke the editor or `-` to get input from **stdin**.
 If the name is already used in this section, then an error will be issued;
 use `!` option to replace the existing file,
 or set the clobber variable to _false_ in the configuration file.
@@ -66,13 +66,13 @@ use `!` option to create it,
 or set the clobber variable to _false_ in the configuration file.
 
 #### -v, --view
-Shows the _note_ with the default *$PAGER* if one is not specified in the configuration file.
+Shows the _note_ with the default **$PAGER** if one is not specified in the configuration file.
 
 #### -p, --print
-Same as `-v` but writes the contents to *stdout*.
+Same as `-v` but writes the contents to **stdout**.
 
 #### -e, --edit
-Loads the _note_ to the default *$EDITOR* if one is not specified in the configuration file.
+Loads the _note_ to the default **$EDITOR** if one is not specified in the configuration file.
 Also, it can be used with `--add/--append` if it is next to it.
 
 #### -l, --list
@@ -115,7 +115,7 @@ and returns its exit code.
 This option is useful when custom synchronization is needed.
 
 ## ENVIRONMENT
-The *SHELL*, *EDITOR* and *PAGER* environment variables are used.
+The **SHELL**, **EDITOR** and **PAGER** environment variables are used.
 
 #### NOTESDIR
 The directory of notes.
@@ -136,9 +136,9 @@ If set, the default backup directory.
 
 ## FILES
 When `--rcfile` is given,
-*notes* will read the specified file for setting its options and key bindings.
+**notes** will read the specified file for setting its options and key bindings.
 Without that option,
-*notes* will read the user's _notesrc_ (if it exists), 
+**notes** will read the user's _notesrc_ (if it exists), 
 either `$XDG_CONFIG_HOME/notes/notesrc` or `~/.config/notes/notesrc`
 or `~/.notesrc`, whichever is encountered first.
 See [notesrc 5](man)
