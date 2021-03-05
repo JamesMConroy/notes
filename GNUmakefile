@@ -39,7 +39,7 @@ html: $(APPNAME).man
 
 pdf: $(APPNAME).md
 	md2roff -q $(APPNAME).md > $(APPNAME).man
-	groff $(APPNAME).man -Tpdf -man > $(APPNAME).pdf
+	groff $(APPNAME).man -Tpdf -man -dPDF.EXPORT=1 -dLABEL.REFS=1 -P -e > $(APPNAME).pdf
 
 install: $(APPNAME) $(APPNAME).1.gz $(APPNAME)rc.5.gz
 	sudo install -m 755 -o root -g root -s $(APPNAME) $(INSTALL)

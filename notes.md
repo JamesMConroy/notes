@@ -22,13 +22,13 @@ SYNTAX:
 ## DESCRIPTION
 The notes-files are stored in a user-defined directory with optional subdirectories.
 The subdirectories in the application are named *sections*.
-Normally this directory is `~/.notes` or `~/Nextcloud/Notes` if there is nextcloud.
-It can be specified in the configuration file (see notesrc(5)).
+Normally this directory is `~/.notes` or `~/Nextcloud/Notes` if there is _Nextcloud_.
+It can be specified in the configuration file.
 The files can be plain text, markdown or anything else that can configured
-by the *rule* command in the configuration file (see notesrc(5)).
-If the *note* is `-` then it reads from *stdin*.
+by the _rule_ command in the configuration file.
+If the _note_ is `-` then it reads from *stdin*.
 
-Running program without arguments, enters in TUI mode (ncurses interface).
+Running program without arguments, enters in TUI mode (*ncurses* interface).
 
 The program was designed to behave as the `man` command.
 
@@ -44,12 +44,12 @@ The program was designed to behave as the `man` command.
 ## OPTIONS
 
 #### -a[!], --add[!]
-Creates a new note file. If file extension is not specified then the default will be used (see notesrc).
+Creates a new note file. If file extension is not specified then the default will be used (see notesrc(5)).
 If additional files are specified in the command line, their contents will be inserted into the new note.
 Use it with `-e` to invoke the editor or `-` to get input from *stdin*.
 If the name is already used in this section, then an error will be issued;
 use `!` option to replace the existing file,
-or set the clobber variable to `false` in the configuration file. (see notesrc(5))
+or set the clobber variable to _false_ in the configuration file.
 
 ```
 # example 1: cat yyy zzz > xxx
@@ -63,20 +63,20 @@ or set the clobber variable to `false` in the configuration file. (see notesrc(5
 Same as `-a` but instead of overwriting, the new note is appended to the file.
 If the name does not exist, then an error will be issued;
 use `!` option to create it,
-or set the clobber variable to `false` in the configuration file. (see notesrc(5))
+or set the clobber variable to _false_ in the configuration file.
 
 #### -v, --view
-Shows the *note* with the default *$PAGER* if one is not specified in the configuration file.
+Shows the _note_ with the default *$PAGER* if one is not specified in the configuration file.
 
 #### -p, --print
 Same as `-v` but writes the contents to *stdout*.
 
 #### -e, --edit
-Loads the *note* to the default *$EDITOR* if one is not specified in the configuration file.
+Loads the _note_ to the default *$EDITOR* if one is not specified in the configuration file.
 Also, it can be used with `--add/--append` if it is next to it.
 
 #### -l, --list
-Displays the notes names that match *pattern*.
+Displays the notes names that match _pattern_.
 
 #### -f, --files
 Same as `-l` but prints out the full path filenames.
@@ -87,7 +87,7 @@ Deletes a note.
 #### -r, --rename
 Renames and/or moves a note. A second parameter is required to specify the new
 name. If file extension is specified in the new name, then it will use it.
-*rename* can also change the section if separated by '/' before the name,
+_rename_ can also change the section if separated by '/' before the name,
 e.g., `section3/new-name`.
 
 #### -a, --all
@@ -97,9 +97,9 @@ Do not use it as first option because it means `--add`.
 #### -h, --help
 Displays a short help text and exits.
 
-#### -c, --rcfile *file*
-Read this `file` for setting notes options, instead of reading
-the default user's notesrc file.
+#### -c, --rcfile
+Read this _rcfile_ for setting notes options, instead of reading
+the default user's _notesrc_ file.
 
 #### --version
 Displays the program version, copyright and license information and exits.
@@ -115,7 +115,7 @@ and returns its exit code.
 This option is useful when custom synchronization is needed.
 
 ## ENVIRONMENT
-The SHELL, EDITOR and PAGER environment variables are used.
+The *SHELL*, *EDITOR* and *PAGER* environment variables are used.
 
 #### NOTESDIR
 The directory of notes.
@@ -136,28 +136,28 @@ If set, the default backup directory.
 
 ## FILES
 When `--rcfile` is given,
-`notes` will read the specified file for setting its options and key bindings.
+*notes* will read the specified file for setting its options and key bindings.
 Without that option,
-`notes` will read the user's `notesrc` (if it exists), 
+*notes* will read the user's _notesrc_ (if it exists), 
 either `$XDG_CONFIG_HOME/notes/notesrc` or `~/.config/notes/notesrc`
 or `~/.notesrc`, whichever is encountered first.
 See [notesrc 5](man)
 
 ## HOMEPAGE
-<https://github.com/nereusx/notes>
+[](https://github.com/nereusx/notes)
 
 ## REPORTING BUGS
-Report bugs to: <https://github.com/nereusx/notes/issues>
+Report bugs to: [](https://github.com/nereusx/notes/issues)
 
 ## COPYRIGHT
 Copyright © 2020-2021 Nicholas Christopoulos.
-License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>.
 
+License GPLv3+: GNU GPL version 3 or later [](https://gnu.org/licenses/gpl.html).
 This is free software: you are free to change and redistribute it.
 There is NO WARRANTY, to the extent permitted by law.
 
 ## AUTHOR
-Written by Nicholas Christopoulos <mailto:nereus@freemail.gr>.
+Written by Nicholas Christopoulos [](nereus@freemail.gr).
 
 ## SEE ALSO
 [notesrc 5](man),

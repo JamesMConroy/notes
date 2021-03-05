@@ -20,9 +20,9 @@ notes - manages note files.
 .RI [pattern]
 .YS
 .SH DESCRIPTION
-The notes-files are stored in a user-defined directory with optional subdirectories. The subdirectories in the application are named \fBsections\fP. Normally this directory is ‘\f[CR]~/.notes\fP’ or ‘\f[CR]~/Nextcloud/Notes\fP’ if there is nextcloud. It can be specified in the configuration file (see notesrc(5)). The files can be plain text, markdown or anything else that can configured by the \fBrule\fP command in the configuration file (see notesrc(5)). If the \fBnote\fP is ‘\f[CR]-\fP’ then it reads from \fBstdin\fP.
+The notes-files are stored in a user-defined directory with optional subdirectories. The subdirectories in the application are named \fBsections\fP. Normally this directory is ‘\f[CR]~/.notes\fP’ or ‘\f[CR]~/Nextcloud/Notes\fP’ if there is \fINextcloud\fP. It can be specified in the configuration file. The files can be plain text, markdown or anything else that can configured by the \fIrule\fP command in the configuration file. If the \fInote\fP is ‘\f[CR]-\fP’ then it reads from \fBstdin\fP.
 .PP
-Running program without arguments, enters in TUI mode (ncurses interface).
+Running program without arguments, enters in TUI mode (\fBncurses\fP interface).
 .PP
 The program was designed to behave as the ‘\f[CR]man\fP’ command.
 .PP
@@ -40,7 +40,7 @@ The program was designed to behave as the ‘\f[CR]man\fP’ command.
 .PP
 .TP
 \fB-a[!], --add[!]
-\fRCreates a new note file. If file extension is not specified then the default will be used (see notesrc). If additional files are specified in the command line, their contents will be inserted into the new note. Use it with ‘\f[CR]-e\fP’ to invoke the editor or ‘\f[CR]-\fP’ to get input from \fBstdin\fP. If the name is already used in this section, then an error will be issued; use ‘\f[CR]!\fP’ option to replace the existing file, or set the clobber variable to ‘\f[CR]false\fP’ in the configuration file.(see notesrc(5))
+\fRCreates a new note file. If file extension is not specified then the default will be used (see notesrc(5)). If additional files are specified in the command line, their contents will be inserted into the new note. Use it with ‘\f[CR]-e\fP’ to invoke the editor or ‘\f[CR]-\fP’ to get input from \fBstdin\fP. If the name is already used in this section, then an error will be issued; use ‘\f[CR]!\fP’ option to replace the existing file, or set the clobber variable to \fIfalse\fP in the configuration file.
 .PP
 .RS
 .EX
@@ -53,11 +53,11 @@ The program was designed to behave as the ‘\f[CR]man\fP’ command.
 .RE
 .TP
 \fB-a[!]+, --append[!]
-\fRSame as ‘\f[CR]-a\fP’ but instead of overwriting, the new note is appended to the file. If the name does not exist, then an error will be issued; use ‘\f[CR]!\fP’ option to create it, or set the clobber variable to ‘\f[CR]false\fP’ in the configuration file.(see notesrc(5))
+\fRSame as ‘\f[CR]-a\fP’ but instead of overwriting, the new note is appended to the file. If the name does not exist, then an error will be issued; use ‘\f[CR]!\fP’ option to create it, or set the clobber variable to \fIfalse\fP in the configuration file.
 .PP
 .TP
 \fB-v, --view
-\fRShows the \fBnote\fP with the default \fB$PAGER\fP if one is not specified in the configuration file.
+\fRShows the \fInote\fP with the default \fB$PAGER\fP if one is not specified in the configuration file.
 .PP
 .TP
 \fB-p, --print
@@ -65,11 +65,11 @@ The program was designed to behave as the ‘\f[CR]man\fP’ command.
 .PP
 .TP
 \fB-e, --edit
-\fRLoads the \fBnote\fP to the default \fB$EDITOR\fP if one is not specified in the configuration file. Also, it can be used with ‘\f[CR]--add/--append\fP’ if it is next to it.
+\fRLoads the \fInote\fP to the default \fB$EDITOR\fP if one is not specified in the configuration file. Also, it can be used with ‘\f[CR]--add/--append\fP’ if it is next to it.
 .PP
 .TP
 \fB-l, --list
-\fRDisplays the notes names that match \fBpattern\fP.
+\fRDisplays the notes names that match \fIpattern\fP.
 .PP
 .TP
 \fB-f, --files
@@ -81,7 +81,7 @@ The program was designed to behave as the ‘\f[CR]man\fP’ command.
 .PP
 .TP
 \fB-r, --rename
-\fRRenames and/or moves a note. A second parameter is required to specify the new name. If file extension is specified in the new name, then it will use it.\fBrename\fP can also change the section if separated by '/' before the name, e.g.,‘\f[CR]section3/new-name\fP’.
+\fRRenames and/or moves a note. A second parameter is required to specify the new name. If file extension is specified in the new name, then it will use it.\fIrename\fP can also change the section if separated by '/' before the name, e.g.,‘\f[CR]section3/new-name\fP’.
 .PP
 .TP
 \fB-a, --all
@@ -92,8 +92,8 @@ The program was designed to behave as the ‘\f[CR]man\fP’ command.
 \fRDisplays a short help text and exits.
 .PP
 .TP
-\fB-c, --rcfile *file*
-\fRRead this ‘\f[CR]file\fP’ for setting notes options, instead of reading the default user's notesrc file.
+\fB-c, --rcfile
+\fRRead this \fIrcfile\fP for setting notes options, instead of reading the default user's \fInotesrc\fP file.
 .PP
 .TP
 \fB--version
@@ -108,7 +108,7 @@ The program was designed to behave as the ‘\f[CR]man\fP’ command.
 \fRExecutes the command defined by ‘\f[CR]onexit\fP’ in the configuration file and returns its exit code. This option is useful when custom synchronization is needed.
 .PP
 .SH ENVIRONMENT
-The SHELL, EDITOR and PAGER environment variables are used.
+The \fBSHELL\fP,\fBEDITOR\fP and \fBPAGER\fP environment variables are used.
 .PP
 .TP
 \fBNOTESDIR
@@ -131,22 +131,31 @@ The SHELL, EDITOR and PAGER environment variables are used.
 \fRIf set, the default backup directory.
 .PP
 .SH FILES
-When ‘\f[CR]--rcfile\fP’ is given,‘\f[CR]notes\fP’ will read the specified file for setting its options and key bindings. Without that option,‘\f[CR]notes\fP’ will read the user's ‘\f[CR]notesrc\fP’(if it exists), either ‘\f[CR]$XDG_CONFIG_HOME/notes/notesrc\fP’ or ‘\f[CR]~/.config/notes/notesrc\fP’ or ‘\f[CR]~/.notesrc\fP’, whichever is encountered first. See
+When ‘\f[CR]--rcfile\fP’ is given,\fBnotes\fP will read the specified file for setting its options and key bindings. Without that option,\fBnotes\fP will read the user's \fInotesrc\fP (if it exists), either ‘\f[CR]$XDG_CONFIG_HOME/notes/notesrc\fP’ or ‘\f[CR]~/.config/notes/notesrc\fP’ or ‘\f[CR]~/.notesrc\fP’, whichever is encountered first. See
 \fBnotesrc\fP(5)
 .PP
 .SH HOMEPAGE
-<https://github.com/nereusx/notes>
+.UR https://github.com/nereusx/notes
+.UE
 .PP
 .SH REPORTING BUGS
-Report bugs to:<https://github.com/nereusx/notes/issues>
+Report bugs to:
+.UR https://github.com/nereusx/notes/issues
+.UE
 .PP
 .SH COPYRIGHT
-Copyright © 2020-2021 Nicholas Christopoulos. License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>.
+Copyright © 2020-2021 Nicholas Christopoulos.
 .PP
-This is free software: you are free to change and redistribute it. There is NO WARRANTY, to the extent permitted by law.
+License GPLv3+: GNU GPL version 3 or later
+.UR https://gnu.org/licenses/gpl.html
+.UE
+. This is free software: you are free to change and redistribute it. There is NO WARRANTY, to the extent permitted by law.
 .PP
 .SH AUTHOR
-Written by Nicholas Christopoulos <mailto:nereus@freemail.gr>.
+Written by Nicholas Christopoulos
+.MT nereus@freemail.gr
+.ME
+.
 .PP
 .SH SEE ALSO
 \fBnotesrc\fP(5)
