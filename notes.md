@@ -1,4 +1,4 @@
-# notes 1 2021-01-22 "NDC Tools Collection"
+# notes 1 2021-03-06 "NDC Tools Collection"
 
 ## NAME
 notes - manages note files.
@@ -137,29 +137,28 @@ If set, the default backup directory.
 ## FILES
 When `--rcfile` is given,
 **notes** will read the specified file for setting its options and key bindings.
-Without that option,
-**notes** will read the user's _notesrc_ (if it exists), 
+Without that option, **notes** will read the user's _notesrc_ (if it exists), 
 either `$XDG_CONFIG_HOME/notes/notesrc` or `~/.config/notes/notesrc`
 or `~/.notesrc`, whichever is encountered first.
-See [notesrc 5](man)
+See [notesrc 5](man).
 
-## HOMEPAGE
-[](https://github.com/nereusx/notes)
+## PROJECT WEBSITE
+[https://github.com/nereusx/notes](https://github.com/nereusx/notes)
 
 ## REPORTING BUGS
-Report bugs to: [](https://github.com/nereusx/notes/issues)
+Report bugs to: [https://github.com/nereusx/notes/issues](https://github.com/nereusx/notes/issues)
 
 ## COPYRIGHT
 Copyright © 2020-2021 Nicholas Christopoulos.
 
-License GPLv3+: GNU GPL version 3 or later [](https://gnu.org/licenses/gpl.html).
+License GPLv3+: GNU GPL version 3 or later [https://gnu.org/licenses/gpl.html](https://gnu.org/licenses/gpl.html).
+
 This is free software: you are free to change and redistribute it.
 There is NO WARRANTY, to the extent permitted by law.
 
 ## AUTHOR
-Written by Nicholas Christopoulos [](nereus@freemail.gr).
+Written by Nicholas Christopoulos [nereus@freemail.gr](nereus@freemail.gr).
 
 ## SEE ALSO
-[notesrc 5](man),
-[groff_man 7](man), [man-pages 7](man).
+[notesrc 5](man), [groff_man 7](man), [man-pages 7](man).
 
