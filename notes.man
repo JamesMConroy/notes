@@ -136,23 +136,18 @@ The \fBSHELL\fP, \fBEDITOR\fP and \fBPAGER\fP environment variables are used.
 When ‘\f[CR]--rcfile\fP’ is given, \fBnotes\fP will read the specified file for setting its options and key bindings. Without that option, \fBnotes\fP will read the user's \fInotesrc\fP (if it exists), either ‘\f[CR]$XDG_CONFIG_HOME/notes/notesrc\fP’ or ‘\f[CR]~/.config/notes/notesrc\fP’ or ‘\f[CR]~/.notesrc\fP’, whichever is encountered first. See
 .BR notesrc (5).
 .PP
-.SH PROJECT WEBSITE
-.UR https://github.com/nereusx/notes
-.UE
-.PP
-.SH REPORTING BUGS
-Report bugs to:
-.UR https://github.com/nereusx/notes/issues
-.UE
-.PP
 .SH COPYRIGHT
 Copyright © 2020-2021 Nicholas Christopoulos.
 .PP
 License GPLv3+: GNU GPL version 3 or later
 .UR https://gnu.org/licenses/gpl.html
 .UE .
-.PP
 This is free software: you are free to change and redistribute it. There is NO WARRANTY, to the extent permitted by law.
+.PP
+.SH HOMEPAGE
+.UR https://github.com/nereusx/notes
+Homepage
+.UE .
 .PP
 .SH AUTHOR
 Written by Nicholas Christopoulos
