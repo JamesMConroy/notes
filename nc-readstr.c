@@ -49,7 +49,7 @@ bool nc_mvweditstr(WINDOW *w, int y, int x, char *u8str, int maxlen) {
 		// get key
 		key = mvwgetch(w, y, x + pos);
 		if ( u8ischar(key) ) {
-			char mbs[5];
+			char mbs[7];
 			int keylen = u8csize(key);
 			mbs[0] = key;
 			for ( i = 1; i < keylen; i ++ )

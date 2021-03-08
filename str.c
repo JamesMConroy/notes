@@ -85,7 +85,9 @@ int u8csize(unsigned char c) {
 	int len = 1;
 	
 	if ( (c & 0xE0) == 0xC0 ) { // valid UTF-8
-		if ( (c & 0xF8) == 0xF0 ) len = 4;
+		if ( (c & 0xFE) == 0xFC ) len = 6;
+		else if ( (c & 0xFC) == 0xF8 ) len = 5;
+		else if ( (c & 0xF8) == 0xF0 ) len = 4;
 		else if ( (c & 0xF0) == 0xE0 ) len = 3;
 		else if ( (c & 0xE0) == 0xC0 ) len = 2;
 		}

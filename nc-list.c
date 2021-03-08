@@ -106,7 +106,7 @@ int nc_listbox(const char *title, const char **items, int defidx) {
 				wchar_t	wi, wc;
 				int		clen = u8csize(c);
 				if ( clen > 1 ) {
-					char mbs[5];
+					char mbs[7];
 					mbs[0] = c;
 					for ( i = 1; i < clen; i ++ )
 						mbs[i] = wgetch(w);

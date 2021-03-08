@@ -1119,7 +1119,7 @@ void explorer() {
 			pf = nc_getprg("input", ch);
 			wchar_t wch = (wchar_t) ch;
 			if ( u8ischar(ch) ) {
-				char mbs[5];
+				char mbs[7];
 				int keylen = u8csize(ch);
 				mbs[0] = ch;
 				for ( i = 1; i < keylen; i ++ )

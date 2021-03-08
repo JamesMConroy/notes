@@ -44,7 +44,7 @@ The program was designed to behave as the `man` command.
 ## OPTIONS
 
 #### -a[!], --add[!]
-Creates a new note file. If file extension is not specified then the default will be used (see notesrc(5)).
+Creates a new note file. If file extension is not specified then the default will be used (see [notesrc 5](man)).
 If additional files are specified in the command line, their contents will be inserted into the new note.
 Use it with `-e` to invoke the editor or `-` to get input from **stdin**.
 If the name is already used in this section, then an error will be issued;
