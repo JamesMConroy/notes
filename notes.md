@@ -142,19 +142,15 @@ either `$XDG_CONFIG_HOME/notes/notesrc` or `~/.config/notes/notesrc`
 or `~/.notesrc`, whichever is encountered first.
 See [notesrc 5](man).
 
-## PROJECT WEBSITE
-[https://github.com/nereusx/notes](https://github.com/nereusx/notes)
-
-## REPORTING BUGS
-Report bugs to: [https://github.com/nereusx/notes/issues](https://github.com/nereusx/notes/issues)
-
 ## COPYRIGHT
 Copyright © 2020-2021 Nicholas Christopoulos.
 
 License GPLv3+: GNU GPL version 3 or later [https://gnu.org/licenses/gpl.html](https://gnu.org/licenses/gpl.html).
-
 This is free software: you are free to change and redistribute it.
 There is NO WARRANTY, to the extent permitted by law.
+
+## HOMEPAGE
+[Homepage](https://github.com/nereusx/notes).
 
 ## AUTHOR
 Written by Nicholas Christopoulos [nereus@freemail.gr](nereus@freemail.gr).
