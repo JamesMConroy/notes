@@ -40,7 +40,7 @@ The program was designed to behave as the ‘\f[CR]man\fP’ command.
 .SH OPTIONS
 .PP
 .TP
-\fB\fR\fB-a\fR[\fI!\fR], \fB--add\fR[\fI!\fR]
+\fB\fR\fB-a\fR[\fB!\fR], \fB--add\fR[\fB!\fR]
 Creates a new note file. If file extension is not specified then the default will be used (see
 .BR notesrc (5))
 . If additional files are specified in the command line, their contents will be inserted into the new note. Use it with ‘\f[CR]-e\fP’ to invoke the editor or ‘\f[CR]-\fP’ to get input from \fBstdin\fP. If the name is already used in this section, then an error will be issued; use ‘\f[CR]!\fP’ option to replace the existing file, or set the clobber variable to \fIfalse\fP in the configuration file.
@@ -55,7 +55,7 @@ Creates a new note file. If file extension is not specified then the default wil
 .EE
 .in
 .TP
-\fB\fR\fB-a\fR[\fI!\fR]\fI+\fR, \fB--append\fR[\fI!\fR]
+\fB\fR\fB-a\fR[\fB!\fR]\fB+\fR, \fB--append\fR[\fB!\fR]
 Same as ‘\f[CR]-a\fP’ but instead of overwriting, the new note is appended to the file. If the name does not exist, then an error will be issued; use ‘\f[CR]!\fP’ option to create it, or set the clobber variable to \fIfalse\fP in the configuration file.
 .PP
 .TP
