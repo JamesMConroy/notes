@@ -37,6 +37,13 @@ cd notes
 make install
 ```
 
+## Examples
+
+Insert a note about Oxygen Not Included game when I found it.
+```
+echo 'vi "`locate SpeedControlConfig.json`"' | notes -a Games/ONI -
+```
+
 ## Screenshots
 
 ![NCurses interface](https://raw.githubusercontent.com/nereusx/notes/main/screenshots/notes-112x30.png)
