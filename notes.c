@@ -494,12 +494,23 @@ list_t	*notes, *sections;
 // copy file
 bool copy_file(const char *src, const char *trg) {
 	FILE	*inp, *outp;
-	char	buf[LINE_MAX];
+	char	buf[LINE_MAX], *p;
 	size_t	bytes;
 	
 	if ( (inp = fopen(src, "r")) == NULL ) {
 		fprintf(stderr, "%s: errno %d: %s\n", src, errno, strerror(errno));
 		return false;
+		}
+	if ( (p = strrchr(trg, '/')) != NULL ) {
+		char *dd = strdup(trg);
+		dd[p - trg] = '\0';
+		if ( mkdir(dd, 0755) != 0 ) {
+			fprintf(stderr, "%s: errno %d: %s (mkdir [%s])\n", trg, errno, strerror(errno), dd);
+			fclose(inp);
+			free(dd);
+			return false;
+			}
+		free(dd);
 		}
 	if ( (outp = fopen(trg, "w")) == NULL ) {
 		fprintf(stderr, "%s: errno %d: %s\n", trg, errno, strerror(errno));
@@ -850,7 +861,8 @@ void ex_print_note(const note_t *note) {
 					nc_unsetpair(w_prv, color);
 					}
 				else
-					nc_wprintf(w_prv, "%s", buf);
+//					nc_wprintf(w_prv, "%s", buf);
+					wprintw(w_prv, "%s", buf);
 				if ( getcury(w_prv) >= (getmaxy(w_prv)-1) )
 					break;
 				}
@@ -1589,7 +1601,7 @@ void cleanup() {
 #define APP_DESCR \
 "notes - notes manager"
 
-#define APP_VER "1.1"
+#define APP_VER "1.2"
 
 static const char *usage = "\
 "APP_DESCR"\n\
