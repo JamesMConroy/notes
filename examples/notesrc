@@ -4,7 +4,7 @@
 notebook=~/Nextcloud/Notes
 
 # exclude list
-exclude .git trash *.sqlite
+exclude .git .* trash *.sqlite
 
 # rules
 rule view *.pdf mupdf %f
