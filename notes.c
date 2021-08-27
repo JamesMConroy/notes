@@ -473,7 +473,8 @@ void read_conf(const char *rc) {
 		if ( fp ) {
 			while ( fgets(buf, LINE_MAX, fp) ) {
 				line ++;
-				parse(line, rtrim(buf));
+				rtrim(buf);
+				parse(line, buf);
 				}
 			fclose(fp);
 			}

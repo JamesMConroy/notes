@@ -66,8 +66,9 @@ int	strpos(const char *source, const char *what);
 char *insert(const char *source, int pos, const char *string);
 char *delete(const char *source, int pos, int count);
 
-//
-char* rtrim(char* str);
+// right trim
+#define rtrim(s)\
+	{ size_t _=strlen((s)); while(_) { _--; if (isspace((s)[_])) (s)[_]='\0'; else break; } }
 
 // replace char
 #define strtotr(b,s,r)\

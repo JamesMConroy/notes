@@ -234,11 +234,13 @@ char *delete(const char *source, int pos, int count) {
 	}
 
 // remove trailing spaces
+/*
 char* rtrim(char* str) {
 	for ( int l = strlen(str); l && isspace(str[l-1]); l -- )
 		str[l-1] = '\0';
     return str;
 	}
+*/
 
 //
 int cwords_add(cwords_t *list, const char *src) {
