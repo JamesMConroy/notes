@@ -494,27 +494,32 @@ list_t	*notes, *sections;
 
 // copy file
 bool copy_file(const char *src, const char *trg) {
-	FILE	*inp, *outp;
+	FILE	*inp, *outp, *logf = stderr;
 	char	buf[LINE_MAX], *p;
 	size_t	bytes;
 	
+//	logf = fopen("/tmp/notes.log", "a");
+//	fprintf(logf, "copy_file(\"%s\", \"%s\")\n", src, trg);
+	
 	if ( (inp = fopen(src, "r")) == NULL ) {
-		fprintf(stderr, "%s: errno %d: %s\n", src, errno, strerror(errno));
+		fprintf(logf, "%s: errno %d: %s\n", src, errno, strerror(errno));
 		return false;
 		}
 	if ( (p = strrchr(trg, '/')) != NULL ) {
 		char *dd = strdup(trg);
 		dd[p - trg] = '\0';
-		if ( mkdir(dd, 0755) != 0 ) {
-			fprintf(stderr, "%s: errno %d: %s (mkdir [%s])\n", trg, errno, strerror(errno), dd);
-			fclose(inp);
-			free(dd);
-			return false;
+		if ( access(dd, W_OK) != 0 ) { // new section ?
+			if ( mkdir(dd, 0755) != 0 ) {
+				fprintf(logf, "%s: errno %d: %s (mkdir [%s])\n", trg, errno, strerror(errno), dd);
+				fclose(inp);
+				free(dd);
+				return false;
+				}
 			}
 		free(dd);
 		}
 	if ( (outp = fopen(trg, "w")) == NULL ) {
-		fprintf(stderr, "%s: errno %d: %s\n", trg, errno, strerror(errno));
+		fprintf(logf, "%s: errno %d: %s\n", trg, errno, strerror(errno));
 		fclose(inp);
 		return false;
 		}
@@ -1602,7 +1607,7 @@ void cleanup() {
 #define APP_DESCR \
 "notes - notes manager"
 
-#define APP_VER "1.2"
+#define APP_VER "1.3"
 
 static const char *usage = "\
 "APP_DESCR"\n\
