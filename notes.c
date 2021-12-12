@@ -44,6 +44,11 @@
 #include "list.h"
 #include "str.h"
 #include "nc-plus.h"
+#if defined(__GNU_GLIBC__)
+	#define FNM_GLIBC_EXTRA FNM_EXTMATCH
+#else
+	#define FNM_GLIBC_EXTRA 0
+#endif
 
 #define OPT_AUTO	0x0001
 #define OPT_LIST	0x0002
@@ -382,7 +387,7 @@ bool rule_exec(int action, const char *fn) {
 	base ++;
 	while ( cur ) {
 		rule_t *rule = (rule_t *) cur->data;
-		if ( rule->code == action && fnmatch(rule->pattern, base, FNM_PATHNAME | FNM_PERIOD | FNM_EXTMATCH) == 0 ) {
+		if ( rule->code == action && fnmatch(rule->pattern, base, FNM_PATHNAME | FNM_PERIOD | FNM_GLIBC_EXTRA) == 0 ) {
 			char file[PATH_MAX];
 			if ( fn[0] == '/' )
 				snprintf(file, PATH_MAX, "'%s'", fn + root_dir_len);
@@ -588,7 +593,7 @@ bool dirwalk_checkfn(const char *fn) {
     if ( strcmp(fn, ".") == 0 || strcmp(fn, "..") == 0 )
 		return false;
 	for ( cur = exclude->head; cur; cur = cur->next ) {
-		if ( fnmatch((const char *) cur->data, fn, FNM_PATHNAME | FNM_PERIOD | FNM_EXTMATCH | FNM_CASEFOLD) == 0 )
+		if ( fnmatch((const char *) cur->data, fn, FNM_PATHNAME | FNM_PERIOD | FNM_GLIBC_EXTRA | FNM_CASEFOLD) == 0 )
 			return false;
 		}
 	return true;
@@ -626,7 +631,7 @@ void dirwalk(const char *name) {
 				note->section[0] = '\0';
 				strcpy(note->name, buf);
 				}
-			if ( strlen(current_filter) == 0 || fnmatch(current_filter, note->name, FNM_PATHNAME | FNM_PERIOD | FNM_EXTMATCH | FNM_CASEFOLD) == 0 ) {
+			if ( strlen(current_filter) == 0 || fnmatch(current_filter, note->name, FNM_PATHNAME | FNM_PERIOD | FNM_GLIBC_EXTRA | FNM_CASEFOLD) == 0 ) {
 				stat(note->file, &note->st);
 				list_add(notes, note, sizeof(note_t));
 				if ( list_findstr(sections, note->section) == NULL )
@@ -1828,7 +1833,7 @@ int main(int argc, char *argv[]) {
 				if ( strcmp(current_section, note->section) != 0 )
 					continue;
 				}
-			if ( fnmatch(note_pat, note->name, FNM_PERIOD | FNM_CASEFOLD | FNM_EXTMATCH) == 0 ) {
+			if ( fnmatch(note_pat, note->name, FNM_PERIOD | FNM_CASEFOLD | FNM_GLIBC_EXTRA) == 0 ) {
 				if ( (opt_flags & OPT_LIST) || (opt_flags & OPT_AUTO) || (opt_flags & OPT_FILES) )
 					note_pl(note);
 				list_addptr(res, note);
