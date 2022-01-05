@@ -44,8 +44,8 @@ pdf: $(APPNAME).md
 
 install: $(APPNAME) $(APPNAME).1.gz $(APPNAME)rc.5.gz
 	sudo install -m 755 -o root -g root -s $(APPNAME) $(INSTALL)
-	sudo install -m 644 -o root -g root $(APPNAME).1.gz $(MANDIR1)
-	sudo install -m 644 -o root -g root $(APPNAME)rc.5.gz $(MANDIR5)
+	sudo install -m 644 -o root -g root $(APPNAME).1.gz $(MANDIR1)/
+	sudo install -m 644 -o root -g root $(APPNAME)rc.5.gz $(MANDIR5)/
 
 uninstall:
 	sudo rm $(INSTALL)/$(APPNAME) $(MANDIR1)/$(APPNAME).1.gz $(MANDIR5)/$(APPNAME)rc.5.gz
