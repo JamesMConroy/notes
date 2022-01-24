@@ -1,11 +1,16 @@
 #
 # note: ps2pdf produces better results
 
+DESTDIR ?=
+prefix  ?= /usr/local
+bindir  ?= $(prefix)/bin
+mandir  ?= $(prefix)/share/man
+man1dir ?= $(mandir)/man1
+man5dir ?= $(mandir)/man5
+
 APPNAME := notes
 ADDMODS := str.o nc-readstr.o nc-core.o nc-keyb.o nc-view.o nc-list.o notes.o list.o
-INSTALL := /usr/local/bin
-MANDIR1 := /usr/local/share/man/man1
-MANDIR5 := /usr/local/share/man/man5
+
 CFLAGS  := -Os -Wall -Wformat=0 -D_GNU_SOURCE
 LDLIBS  := -lncurses
 #M2RFLAGS := -z
@@ -14,7 +19,7 @@ M2RFLAGS :=
 all: $(APPNAME)
 
 clean:
-	-rm -f *.o $(APPNAME) $(APPNAME).man $(APPNAME).1.gz $(APPNAME)rc.man $(APPNAME)rc.5.gz > /dev/null
+	rm -f *.o $(APPNAME) $(APPNAME).man $(APPNAME).1.gz $(APPNAME)rc.man $(APPNAME)rc.5.gz > /dev/null
 
 $(APPMODS): %.o: %.c
 
@@ -43,12 +48,15 @@ pdf: $(APPNAME).md
 	groff $(APPNAME).man -Tpdf -man -dPDF.EXPORT=1 -dLABEL.REFS=1 -P -e > $(APPNAME).pdf
 
 install: $(APPNAME) $(APPNAME).1.gz $(APPNAME)rc.5.gz
-	sudo install -m 755 -o root -g root -s $(APPNAME) $(INSTALL)
-	sudo install -m 644 -o root -g root $(APPNAME).1.gz $(MANDIR1)
-	sudo install -m 644 -o root -g root $(APPNAME)rc.5.gz $(MANDIR5)
+	install -m 755 -o root -g root -d $(DESTDIR)$(bindir)
+	install -m 755 -o root -g root -d $(DESTDIR)$(man1dir)
+	install -m 755 -o root -g root -d $(DESTDIR)$(man5dir)
+	install -m 755 -o root -g root -s $(APPNAME) $(DESTDIR)$(bindir)
+	install -m 644 -o root -g root $(APPNAME).1.gz $(DESTDIR)$(man1dir)
+	install -m 644 -o root -g root $(APPNAME)rc.5.gz $(DESTDIR)$(man5dir)
 
 uninstall:
-	sudo rm $(INSTALL)/$(APPNAME) $(MANDIR1)/$(APPNAME).1.gz $(MANDIR5)/$(APPNAME)rc.5.gz
+	rm -f $(DESTDIR)$(bindir)/$(APPNAME) $(DESTDIR)$(man1dir)/$(APPNAME).1.gz $(DESTDIR)$(man5dir)/$(APPNAME)rc.5.gz
 
 # utilities
 nc-colors: nc-colors.c
