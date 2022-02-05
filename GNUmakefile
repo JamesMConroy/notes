@@ -1,5 +1,6 @@
 #
 # note: ps2pdf produces better results
+# note: if libncursesw.so.* is missing create symbolic link of libncurses.so.* and run ldconfig
 
 DESTDIR ?=
 prefix  ?= /usr/local
@@ -19,7 +20,7 @@ M2RFLAGS :=
 all: $(APPNAME)
 
 clean:
-	rm -f *.o $(APPNAME) $(APPNAME).man $(APPNAME).1.gz $(APPNAME)rc.man $(APPNAME)rc.5.gz > /dev/null
+	rm -f *.o $(APPNAME) $(APPNAME).man $(APPNAME).1.gz $(APPNAME)rc.man $(APPNAME)rc.5.gz nc-colors nc-getch > /dev/null
 
 $(APPMODS): %.o: %.c
 
@@ -60,8 +61,6 @@ uninstall:
 
 # utilities
 nc-colors: nc-colors.c
-	gcc nc-colors.c -o nc-colors -lncurses
 
 nc-getch: nc-getch.c
-	gcc nc-getch.c -o nc-getch -lncurses
 
