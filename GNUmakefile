@@ -12,7 +12,7 @@ APPNAME := notes
 ADDMODS := str.o nc-readstr.o nc-core.o nc-keyb.o nc-view.o nc-list.o notes.o list.o
 
 CFLAGS  := -Os -Wall -Wformat=0 -D_GNU_SOURCE
-LDLIBS  := -lncurses
+LDLIBS  := -lncursesw -lncurses
 #M2RFLAGS := -z
 M2RFLAGS := 
 
