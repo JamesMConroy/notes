@@ -9,7 +9,7 @@ The files can be plain text, markdown or anything else that
 can configured by *rule* statements in the configuration file.
 
 During startup *notes* reads the configuration file
-`$XDG\_CONFIG\_HOME/notes/noterc` or `~/.config/notes/noterc` or `~/.notesrc`;
+`$XDG\_CONFIG\_HOME/notes/notesrc` or `~/.config/notes/notesrc` or `~/.notesrc`;
 whichever is encountered first.
 
 ## VARIABLES
